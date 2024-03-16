@@ -1,0 +1,35 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-yaml
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.1
+    hooks:
+      - id: pyupgrade
+        args:
+        - --py311-plus
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.3.3
+    hooks:
+      - id: ruff
+        args:
+          - --fix
+          - --exit-non-zero-on-fix
+      - id: ruff-format
+
+# sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
+ci:
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
