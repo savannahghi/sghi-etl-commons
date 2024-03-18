@@ -23,6 +23,7 @@ classifiers = [
     "Typing :: Typed"
 ]
 dependencies = [
+    "attrs~=23.2.0",
     "typing-extensions>=4.10.0",
     "sghi-commons @ git+https://github.com/savannahghi/sghi-commons.git@v1.4.0",
     "sghi-etl-core @ git+https://github.com/savannahghi/sghi-etl-core.git@v1.1.1",
