@@ -11,6 +11,7 @@ from .processors import (
 from .sinks import NullSink, ScatterSink, SplitSink, sink
 from .sources import GatherSource, source
 from .utils import fail_fast, fail_fast_factory, ignored_failed, run_workflow
+from .workflow_builder import WorkflowBuilder
 from .workflow_definitions import SimpleWorkflowDefinition
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "ScatterSink",
     "SplitGatherProcessor",
     "SplitSink",
+    "WorkflowBuilder",
     "fail_fast",
     "fail_fast_factory",
     "ignored_failed",
