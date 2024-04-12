@@ -55,7 +55,9 @@ exclude_patterns = []
 # Be strict about any broken references
 nitpicky = True
 
-nitpick_ignore = []
+nitpick_ignore = [
+    ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
+]
 
 templates_path = ["templates"]
 
