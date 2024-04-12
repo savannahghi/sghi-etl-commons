@@ -56,6 +56,7 @@ exclude_patterns = []
 nitpicky = True
 
 nitpick_ignore = [
+    ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
     ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
 ]
 
