@@ -161,6 +161,7 @@ class NOOPProcessor(Processor[_RDT, _RDT], Generic[_RDT]):
         self._logger.info("Disposal complete.")
 
 
+@final
 class _ProcessorOfCallable(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
     __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
