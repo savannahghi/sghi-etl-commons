@@ -1,6 +1,6 @@
 """Collection of utilities for working with SGHI ETL Workflows."""
 
-from .processors import NOOPProcessor
+from .processors import NOOPProcessor, processor
 from .utils import fail_fast, fail_fast_factory, ignored_failed
 
 __all__ = [
@@ -8,4 +8,5 @@ __all__ = [
     "fail_fast",
     "fail_fast_factory",
     "ignored_failed",
+    "processor",
 ]
