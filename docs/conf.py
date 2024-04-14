@@ -56,6 +56,7 @@ exclude_patterns = []
 nitpicky = True
 
 nitpick_ignore = [
+    ("py:class", "Processor"),  # docs aren't published yet
     ("py:class", "TracebackType"),  # Used as type annotation. Only available when type checking
     ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
     ("py:class", "sghi.etl.commons.processors._RDT"),  # private type annotations
