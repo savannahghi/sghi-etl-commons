@@ -1,5 +1,5 @@
 # ruff: noqa: D205
-"""Tests for the :module:`sghi.etl.commons.processors` module."""
+"""Tests for the :module:`sghi.etl.commons.sources` module."""
 
 from __future__ import annotations
 
