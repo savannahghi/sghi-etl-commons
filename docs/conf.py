@@ -57,19 +57,23 @@ nitpicky = True
 
 nitpick_ignore = [
     ("py:class", "Processor"),  # docs aren't published yet
+    ("py:class", "Source"),  # docs aren't published yet
     ("py:class", "TracebackType"),  # Used as type annotation. Only available when type checking
     ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
     ("py:class", "sghi.etl.commons.processors._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.processors._PDT"),  # private type annotations
+    ("py:class", "sghi.etl.commons.sources._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
     ("py:class", "sghi.etl.core._RDT"),  # private type annotations
     ("py:class", "sghi.etl.core._PDT"),  # private type annotations
     ("py:class", "sghi.etl.core.Processor"),  # docs aren't published yet
+    ("py:class", "sghi.etl.core.Source"),  # docs aren't published yet
     ("py:exc", "ResourceDisposedError"),  # docs aren't published yet
     ("py:exc", "sghi.disposable.ResourceDisposedError"),  # docs aren't published yet
     ("py:func", "sghi.disposable.not_disposed"),  # docs aren't published yet
     ("py:obj", "sghi.etl.commons.processors._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.processors._RDT"),  # private type annotations
+    ("py:obj", "sghi.etl.commons.sources._RDT"),  # private type annotations
 ]
 
 templates_path = ["templates"]
