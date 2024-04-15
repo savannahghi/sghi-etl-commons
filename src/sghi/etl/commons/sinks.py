@@ -80,6 +80,80 @@ def sink(f: Callable[[_PDT], None]) -> Sink[_PDT]:
 
 
 @final
+class NullSink(Sink[_PDT], Generic[_PDT]):
+    """A :class:`Sink` that discards all the data it receives.
+
+    Like to ``dev/null`` on Unix, instances of this ``Sink`` discard all data
+    drained to them but report the drain operation as successful. This is
+    mostly useful as a placeholder or where further consumption of processed
+    data is not required.
+
+    .. admonition:: Regarding retry safety
+        :class: tip
+
+        Instances of this ``Sink`` are idempotent and thus inherently safe to
+        retry.
+    """
+
+    __slots__ = ("_is_disposed", "_logger")
+
+    def __init__(self) -> None:
+        """Create a new ``NullSink`` instance."""
+        super().__init__()
+        self._is_disposed: bool = False
+        self._logger: Logger = logging.getLogger(type_fqn(self.__class__))
+
+    @not_disposed
+    @override
+    def __enter__(self) -> Self:
+        """Return ``self`` upon entering the runtime context.
+
+        .. admonition:: Don't use after dispose
+            :class: error
+
+            Invoking this method on an instance that is disposed(i.e. the
+            :attr:`is_disposed` property on the instance is ``True``) will
+            result in a :exc:`ResourceDisposedError` being raised.
+
+        :return: This instance.
+
+        :raise ResourceDisposedError: If this sink has already been disposed.
+        """
+        return super(Sink, self).__enter__()
+
+    @property
+    @override
+    def is_disposed(self) -> bool:
+        return self._is_disposed
+
+    @not_disposed
+    @override
+    def drain(self, processed_data: _PDT) -> None:
+        """Discard all the received data.
+
+        .. admonition:: Don't use after dispose
+            :class: error
+
+            Invoking this method on an instance that is disposed(i.e. the
+            :attr:`is_disposed` property on the instance is ``True``) will
+            result in a :exc:`ResourceDisposedError` being raised.
+
+        :param processed_data: The processed data to consume/drain.
+
+        :return: None.
+
+        :raise ResourceDisposedError: If this sink has already been disposed.
+        """
+        self._logger.info("Discarding all received data.")
+        # Do nothing with the received data.
+
+    @override
+    def dispose(self) -> None:
+        self._is_disposed = True
+        self._logger.info("Disposal complete.")
+
+
+@final
 class _SinkOfCallable(Sink[_PDT], Generic[_PDT]):
     __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
@@ -152,5 +226,6 @@ class _SinkOfCallable(Sink[_PDT], Generic[_PDT]):
 
 
 __all__ = [
+    "NullSink",
     "sink",
 ]
