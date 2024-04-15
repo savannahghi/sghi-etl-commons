@@ -71,6 +71,7 @@ nitpick_ignore = [
     ("py:class", "sghi.etl.core.Processor"),  # docs aren't published yet
     ("py:class", "sghi.etl.core.Sink"),  # docs aren't published yet
     ("py:class", "sghi.etl.core.Source"),  # docs aren't published yet
+    ("py:class", "sghi.retry.Retry"),  # docs aren't published yet
     ("py:exc", "ResourceDisposedError"),  # docs aren't published yet
     ("py:exc", "sghi.disposable.ResourceDisposedError"),  # docs aren't published yet
     ("py:func", "sghi.disposable.not_disposed"),  # docs aren't published yet
