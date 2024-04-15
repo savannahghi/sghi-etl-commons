@@ -114,7 +114,7 @@ class TestNullSink(TestCase):
         assert instance.is_disposed
 
     def test_multiple_dispose_invocations_is_okay(self) -> None:
-        """Calling :meth:`NullSink.dispose` should be okay.
+        """Calling :meth:`NullSink.dispose` multiple times should be okay.
 
         No errors should be raised and the object should remain disposed.
         """
