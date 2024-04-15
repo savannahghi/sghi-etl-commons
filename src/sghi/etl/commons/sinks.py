@@ -71,7 +71,7 @@ def sink(f: Callable[[_PDT], None]) -> Sink[_PDT]:
     """
     ensure_callable(f, message="A callable object is required.")
 
-    return _SourceOfCallable(delegate_to=f)
+    return _SinkOfCallable(delegate_to=f)
 
 
 # =============================================================================
@@ -80,7 +80,7 @@ def sink(f: Callable[[_PDT], None]) -> Sink[_PDT]:
 
 
 @final
-class _SourceOfCallable(Sink[_PDT], Generic[_PDT]):
+class _SinkOfCallable(Sink[_PDT], Generic[_PDT]):
     __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
     def __init__(self, delegate_to: _SinkCallable[_PDT]) -> None:
