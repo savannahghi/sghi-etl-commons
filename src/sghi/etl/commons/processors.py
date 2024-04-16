@@ -23,7 +23,7 @@ from sghi.utils import ensure_callable, ensure_not_none_nor_empty, type_fqn
 
 
 _PDT = TypeVar("_PDT")
-""""Type variable representing the data type after processing."""
+"""Type variable representing the data type after processing."""
 
 _RDT = TypeVar("_RDT")
 """Type variable representing the raw data type."""

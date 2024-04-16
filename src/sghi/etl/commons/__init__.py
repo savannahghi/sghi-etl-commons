@@ -9,11 +9,13 @@ from .processors import (
 from .sinks import NullSink, sink
 from .sources import source
 from .utils import fail_fast, fail_fast_factory, ignored_failed
+from .workflow_definitions import SimpleWorkflowDefinition
 
 __all__ = [
     "NOOPProcessor",
     "NullSink",
     "ProcessorPipe",
+    "SimpleWorkflowDefinition",
     "fail_fast",
     "fail_fast_factory",
     "ignored_failed",

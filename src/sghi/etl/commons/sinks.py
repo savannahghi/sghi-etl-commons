@@ -20,7 +20,7 @@ from sghi.utils import ensure_callable, type_fqn
 
 
 _PDT = TypeVar("_PDT")
-""""Type variable representing the data type after processing."""
+"""Type variable representing the data type after processing."""
 
 _SinkCallable = Callable[[_PDT], None]
 
