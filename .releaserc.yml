@@ -1,0 +1,94 @@
+branches:
+  - main
+  - name: develop
+    channel: rc
+    prerelease: rc
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - - '@semantic-release/release-notes-generator'
+    - linkCompare: true
+      linkReferences: true
+      writerOpts:
+        commitGroupsSort:
+          - type
+          - title
+        commitSort:
+          - scope
+          - subject
+  - - semantic-release-replace-plugin
+    - replacements:
+        - countMatches: true
+          files:
+           - package.json
+          from: '"version": ".*",'
+          to: '"version": "${nextRelease.version}",'
+          results:
+            - file: package.json
+              hasChanged: true
+              numMatches: 1
+              numReplacements: 1
+  - - '@semantic-release/changelog'
+    - changelogFile: docs/CHANGELOG.md
+  - - '@semantic-release/git'
+    - assets:
+        - docs/CHANGELOG.md
+        - package.json
+      message: "release: ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+  - - '@semantic-release/exec'
+    - publishCmd: "export GITHUB_TOKEN='${process.env.GITHUB_TOKEN}'; tox -e package"
+  - - '@semantic-release/github'
+    - assets:
+        - path: dist/*
+tagFormat: v${version}
+# ------------------------------------------------------------------------------
+# GLOBAL PLUGIN OPTIONS
+# See: https://github.com/semantic-release/semantic-release/blob/master/docs/usage/plugins
+#  .md#plugin-options-configuration
+# ------------------------------------------------------------------------------
+parserOptions:
+  noteKeywords:
+    - BREAKING CHANGES
+    - BREAKING CHANGE
+    - BREAKING
+preset: conventionalcommits
+presetConfig:
+  types:
+    - type: build
+      hidden: true
+    - type: ci
+      hidden: true
+    - type: chore
+      scope: deps
+      section: Dependency Updates
+    - type: chore
+      section: Refactors
+    - type: docs
+      scope: api
+      section: Documentation Updates
+    - type: docs
+      hidden: true
+    - type: feat
+      section: Features
+    - type: fix
+      section: Bug Fixes
+    - type: release
+      hidden: true
+    - type: test
+      hidden: true
+releaseRules:
+  - type: chore
+    scope: deps
+    release: patch
+  - type: docs
+    scope: api
+    release: patch
+  - type: feat
+    release: minor
+  - type: fix
+    release: patch
+  - scope: minor
+    release: minor
+  - scope: patch
+    release: patch
+  - scope: no-release
+    release: false
