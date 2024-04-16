@@ -27,7 +27,7 @@ dependencies = [
     "sghi-commons @ git+https://github.com/savannahghi/sghi-commons.git@v1.4.0",
     "sghi-etl-core @ git+https://github.com/savannahghi/sghi-etl-core.git@v1.1.1",
 ]
-description = "Collection of utilities for working with SGHI ETL Worflows."
+description = "Collection of utilities for working with SGHI ETL Workflows."
 dynamic = ["version"]
 keywords = ["sghi", "etl", "pipeline", "util", "utils"]
 license = {file = "LICENSE"}
