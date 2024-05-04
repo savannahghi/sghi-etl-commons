@@ -7,11 +7,12 @@ from .processors import (
     processor,
 )
 from .sinks import NullSink, sink
-from .sources import source
+from .sources import GatherSource, source
 from .utils import fail_fast, fail_fast_factory, ignored_failed
 from .workflow_definitions import SimpleWorkflowDefinition
 
 __all__ = [
+    "GatherSource",
     "NOOPProcessor",
     "NullSink",
     "ProcessorPipe",
