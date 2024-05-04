@@ -59,6 +59,7 @@ nitpick_ignore = [
     ("py:class", "_RDT"),  # private type annotations
     ("py:class", "_PDT"),  # private type annotations
     ("py:class", "Executor"),  # sphinx can't find it
+    ("py:class", "Future"),  # sphinx can't find it
     ("py:class", "Processor"),  # docs aren't published yet
     ("py:class", "Retry"),  # docs aren't published yet
     ("py:class", "Sink"),  # docs aren't published yet

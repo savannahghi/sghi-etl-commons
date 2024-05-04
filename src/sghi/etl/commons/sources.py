@@ -230,11 +230,18 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
     def draw(self) -> Sequence[_RDT]:
         """Draw data from embedded sources and return the aggregated results.
 
+        This method retrieves data from all embedded sources asynchronously
+        using the configured :class:`Executor`. It then applies the provided
+        result-gatherer function to the :class:`Future` objects resulting from
+        the asynchronous execution. Each of these ``Future`` objects wraps the
+        result of drawing from each embedded source contained by this
+        ``GatherSource``, and they have the same order.
+
         The contents of the resulting aggregate, and their ordering, are
-        determined by the result-gatherer function provided at this object's
-        instantiation. That is, the contents of the returned ``Sequence``, will
-        be the same as those returned by this object's result-gatherer function
-        and in the same order.
+        determined by the provided result-gatherer function. That is, the
+        contents of the returned ``Sequence``, will be the same as those
+        returned by this object's result-gatherer function and in the same
+        order.
 
         .. admonition:: Don't use after dispose
             :class: error
