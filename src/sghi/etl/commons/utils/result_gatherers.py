@@ -37,7 +37,7 @@ def fail_fast(
     exc_wrapper_factory: Callable[[str | None], BaseException] | None = None,
     exc_wrapper_message: str | None = None,
 ) -> Iterable[_T]:
-    """Return the results from futures or errors if any of the futures failed.
+    """Return the results from futures or error if any of the futures failed.
 
     This function returns an ``Iterable`` of the results or errors(if any of
     the futures failed) gathered from the provided
