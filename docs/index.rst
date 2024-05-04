@@ -36,7 +36,11 @@ API Reference
    :caption: API
    :recursive:
 
-     sghi.etl.commons
+     sghi.etl.commons.processors
+     sghi.etl.commons.sinks
+     sghi.etl.commons.sources
+     sghi.etl.commons.utils
+     sghi.etl.commons.workflow_definitions
 
 
 .. _sghi-etl-core: https://github.com/savannahghi/sghi-etl-core/
