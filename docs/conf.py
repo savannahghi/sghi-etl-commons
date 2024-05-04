@@ -58,11 +58,14 @@ nitpicky = True
 nitpick_ignore = [
     ("py:class", "_RDT"),  # private type annotations
     ("py:class", "_PDT"),  # private type annotations
+    ("py:class", "Executor"),  # sphinx can't find it
     ("py:class", "Processor"),  # docs aren't published yet
+    ("py:class", "Retry"),  # docs aren't published yet
     ("py:class", "Sink"),  # docs aren't published yet
     ("py:class", "Source"),  # docs aren't published yet
     ("py:class", "WorkflowDefinition"),  # docs aren't published yet
     ("py:class", "TracebackType"),  # Used as type annotation. Only available when type checking
+    ("py:class", "concurrent.futures._base.Executor"),  # sphinx can't find it
     ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
     ("py:class", "sghi.etl.commons.processors._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.processors._PDT"),  # private type annotations
