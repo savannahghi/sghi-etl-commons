@@ -1,3 +1,11 @@
+## [1.1.0-rc.1](https://github.com/savannahghi/sghi-etl-commons/compare/v1.0.0...v1.1.0-rc.1) (2024-05-08)
+
+
+### Features
+
+* **processors:** add a `SplitGatherProcessor` ([#17](https://github.com/savannahghi/sghi-etl-commons/issues/17)) ([4439c11](https://github.com/savannahghi/sghi-etl-commons/commit/4439c11724fe1630d2f53e3cc4be8ebc798ff352))
+* **sources:** add a `GatherSource` ([#15](https://github.com/savannahghi/sghi-etl-commons/issues/15)) ([d64635a](https://github.com/savannahghi/sghi-etl-commons/commit/d64635a66fa058c9c26007d281620491de8b9a7e))
+
 ## [1.0.0](https://github.com/savannahghi/sghi-etl-commons/compare/...v1.0.0) (2024-04-16)
 
 
