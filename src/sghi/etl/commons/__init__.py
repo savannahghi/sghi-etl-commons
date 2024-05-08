@@ -3,6 +3,7 @@
 from .processors import (
     NOOPProcessor,
     ProcessorPipe,
+    SplitGatherProcessor,
     pipe_processors,
     processor,
 )
@@ -17,6 +18,7 @@ __all__ = [
     "NullSink",
     "ProcessorPipe",
     "SimpleWorkflowDefinition",
+    "SplitGatherProcessor",
     "fail_fast",
     "fail_fast_factory",
     "ignored_failed",
