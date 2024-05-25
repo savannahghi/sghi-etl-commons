@@ -8,7 +8,7 @@ from .processors import (
     pipe_processors,
     processor,
 )
-from .sinks import NullSink, sink
+from .sinks import NullSink, SplitSink, sink
 from .sources import GatherSource, source
 from .utils import fail_fast, fail_fast_factory, ignored_failed
 from .workflow_definitions import SimpleWorkflowDefinition
@@ -21,6 +21,7 @@ __all__ = [
     "SimpleWorkflowDefinition",
     "ScatterGatherProcessor",
     "SplitGatherProcessor",
+    "SplitSink",
     "fail_fast",
     "fail_fast_factory",
     "ignored_failed",
