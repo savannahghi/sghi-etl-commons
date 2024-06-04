@@ -1,3 +1,13 @@
+## [1.1.0-rc.2](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2024-06-04)
+
+
+### Features
+
+* **processors:** add a `ScatterGatherProcessor` ([#19](https://github.com/savannahghi/sghi-etl-commons/issues/19)) ([a7d4387](https://github.com/savannahghi/sghi-etl-commons/commit/a7d43871ebbf071324ccac2acf86ae61a71b0b2d))
+* **sinks:** add a `ScatterSink` ([#21](https://github.com/savannahghi/sghi-etl-commons/issues/21)) ([6274a31](https://github.com/savannahghi/sghi-etl-commons/commit/6274a31ec774e5fd720938360702af8e44994d63))
+* **sinks:** add a `SplitSink` ([#20](https://github.com/savannahghi/sghi-etl-commons/issues/20)) ([ce4d4ee](https://github.com/savannahghi/sghi-etl-commons/commit/ce4d4ee0e3bf1d7b302f4c08f98acd12993ce832))
+* **utils:** add a workflow runner utility ([4f26bc9](https://github.com/savannahghi/sghi-etl-commons/commit/4f26bc9f2b24c2db1acff289c7545b0dc68d0203))
+
 ## [1.1.0-rc.1](https://github.com/savannahghi/sghi-etl-commons/compare/v1.0.0...v1.1.0-rc.1) (2024-05-08)
 
 
