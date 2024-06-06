@@ -118,7 +118,7 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
     Disposing instances of this class also disposes of their embedded sources.
 
     .. admonition:: Regarding retry safety
-        :class: tip
+        :class: caution
 
         Instances of this ``Source`` are **NOT SAFE** to retry.
     """
@@ -256,8 +256,8 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
         """
         self._logger.info("Aggregating data from all available sources.")
 
-        with self._executor as executor:
-            futures = executor.execute(None)
+        executor = self._executor.__enter__()
+        futures = executor.execute(None)
 
         return tuple(self._result_gatherer(futures))
 
@@ -289,9 +289,9 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
     def _source_to_task(self, s: Source[_RDT]) -> Supplier[_RDT]:
         @supplier
         def do_draw() -> _RDT:
-            with s as _s:
-                draw = self._retry_policy_factory().retry(_s.draw)
-                return draw()
+            _s = s.__enter__()
+            draw = self._retry_policy_factory().retry(_s.draw)
+            return draw()
 
         # noinspection PyTypeChecker
         return do_draw
