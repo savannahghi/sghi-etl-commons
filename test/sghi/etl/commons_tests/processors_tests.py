@@ -42,6 +42,7 @@ class _IntsToChars(Processor[Iterable[int], Iterable[str]]):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         self._buffer: StringIO = StringIO(newline="")
 
     @property

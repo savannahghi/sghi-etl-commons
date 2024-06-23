@@ -40,6 +40,7 @@ API Reference
      sghi.etl.commons.sinks
      sghi.etl.commons.sources
      sghi.etl.commons.utils
+     sghi.etl.commons.workflow_builder
      sghi.etl.commons.workflow_definitions
 
 

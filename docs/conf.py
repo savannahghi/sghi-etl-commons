@@ -75,7 +75,7 @@ nitpick_ignore = [
     ("py:class", "sghi.etl.commons.processors._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.sinks._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.sources._RDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
+    ("py:class", "sghi.etl.commons.utils.result_gatherers._T1"),  # private type annotations
     ("py:class", "sghi.etl.commons.workflow_definitions._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.workflow_definitions._PDT"),  # private type annotations
     ("py:class", "sghi.etl.core._RDT"),  # private type annotations

@@ -22,6 +22,7 @@ from sghi.etl.core import Source
 
 class _StreamingSource(Source[Iterable[int]]):
     def __init__(self) -> None:
+        super().__init__()
         self._yielded: int = 0
         self._is_disposed: bool = False
 
