@@ -4,19 +4,53 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from collections.abc import Iterable, Sequence
+from typing import Any
 from unittest import TestCase
 
 import pytest
 from typing_extensions import override
 
-from sghi.disposable import ResourceDisposedError
+from sghi.disposable import ResourceDisposedError, not_disposed
 from sghi.etl.commons import GatherSource, source
 from sghi.etl.core import Source
 
-if TYPE_CHECKING:
-    from collections.abc import Iterable
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+
+class _StreamingSource(Source[Iterable[int]]):
+    def __init__(self) -> None:
+        super().__init__()
+        self._yielded: int = 0
+        self._is_disposed: bool = False
+
+    @property
+    @override
+    def is_disposed(self) -> bool:
+        return self._is_disposed
+
+    @not_disposed
+    @override
+    def draw(self) -> Iterable[int]:
+        for _ in range(3):
+            yield from self._do_yield()
+        self._yielded = 0
+
+    @override
+    def dispose(self) -> None:
+        self._is_disposed = True
+
+    @not_disposed
+    def _do_yield(self) -> Iterable[int]:
+        yield from range(self._yielded, self._yielded + 4)
+        self._yielded += 4
+
+
+# =============================================================================
+# TESTS
+# =============================================================================
 
 
 def test_source_decorator_delegates_to_the_wrapped_callable() -> None:
@@ -126,6 +160,7 @@ class TestGatherSource(TestCase):
             get_greeting,
             supply_ints,
             supply_ints_slowly,
+            _StreamingSource(),
         ]
         self._instance: Source[Sequence[Any]] = GatherSource(
             sources=self._embedded_sources,
@@ -158,6 +193,7 @@ class TestGatherSource(TestCase):
         assert result[0] == "Hello, World!"
         assert tuple(result[1]) == (0, 1, 2, 3, 4)
         assert tuple(result[2]) == (0, 1, 2, 3, 4)
+        assert tuple(result[3]) == (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
 
     def test_instantiation_fails_on_an_empty_sources_arg(self) -> None:
         """Instantiating a :class:`GatherSource` with an empty ``sources``

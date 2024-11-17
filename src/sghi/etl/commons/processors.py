@@ -198,7 +198,7 @@ class ProcessorPipe(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
     processors.
 
     .. admonition:: Regarding retry safety
-        :class: tip
+        :class: caution
 
         Instances of this ``Processor`` are **NOT SAFE** to retry.
     """
@@ -331,9 +331,9 @@ class ProcessorPipe(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
     def _processor_to_task(self, p: Processor[_RDT, _PDT]) -> Task[_RDT, _PDT]:
         @task
         def do_apply(raw_data: _RDT) -> _PDT:
-            with p as _p:
-                apply = self._retry_policy_factory().retry(_p.apply)
-                return apply(raw_data)
+            _p = p.__enter__()
+            apply = self._retry_policy_factory().retry(_p.apply)
+            return apply(raw_data)
 
         return do_apply
 
@@ -368,7 +368,7 @@ class ScatterGatherProcessor(
     processors.
 
     .. admonition:: Regarding retry safety
-        :class: tip
+        :class: caution
 
         Instances of this ``Processor`` are **NOT SAFE** to retry.
     """
@@ -518,8 +518,8 @@ class ScatterGatherProcessor(
             "Forking processing of the received data to all embedded "
             "processors."
         )
-        with self._executor as executor:
-            futures = executor.execute(raw_data)
+        executor = self._executor.__enter__()
+        futures = executor.execute(raw_data)
 
         return tuple(self._result_gatherer(futures))
 
@@ -551,9 +551,9 @@ class ScatterGatherProcessor(
     def _processor_to_task(self, p: Processor[_RDT, _PDT]) -> Task[_RDT, _PDT]:
         @task
         def do_apply(raw_data: _RDT) -> _PDT:
-            with p as _p:
-                apply = self._retry_policy_factory().retry(_p.apply)
-                return apply(raw_data)
+            _p = p.__enter__()
+            apply = self._retry_policy_factory().retry(_p.apply)
+            return apply(raw_data)
 
         return do_apply
 
@@ -588,7 +588,7 @@ class SplitGatherProcessor(
     processors.
 
     .. admonition:: Regarding retry safety
-        :class: tip
+        :class: caution
 
         Instances of this ``Processor`` are **NOT SAFE** to retry.
     """  # noqa: D205
@@ -757,8 +757,8 @@ class SplitGatherProcessor(
             "to each data part."
         )
 
-        with self._executor as executor:
-            futures = executor.execute(raw_data)
+        executor = self._executor.__enter__()
+        futures = executor.execute(raw_data)
 
         return tuple(self._result_gatherer(futures))
 
@@ -794,9 +794,9 @@ class SplitGatherProcessor(
     ) -> Task[Sequence[_RDT], _PDT]:
         @task
         def do_apply(raw_data: Sequence[_RDT]) -> _PDT:
-            with p as _p:
-                apply = self._retry_policy_factory().retry(_p.apply)
-                return apply(raw_data[i])
+            _p = p.__enter__()
+            apply = self._retry_policy_factory().retry(_p.apply)
+            return apply(raw_data[i])
 
         return do_apply
 
