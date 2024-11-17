@@ -71,11 +71,15 @@ nitpick_ignore = [
     ("py:class", "TracebackType"),  # Used as type annotation. Only available when type checking
     ("py:class", "concurrent.futures._base.Executor"),  # sphinx can't find it
     ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
+    ("py:class", "sghi.exceptions.SGHIError"),  # sphinx can't find it
     ("py:class", "sghi.etl.commons.processors._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.processors._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.sinks._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.sources._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
+    ("py:class", "sghi.etl.commons.utils.result_gatherers._T1"),  # private type annotations
+    ("py:class", "sghi.etl.commons.workflow_builder._RDT"),  # private type annotations
+    ("py:class", "sghi.etl.commons.workflow_builder._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.workflow_definitions._RDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.workflow_definitions._PDT"),  # private type annotations
     ("py:class", "sghi.etl.core._RDT"),  # private type annotations
@@ -93,6 +97,8 @@ nitpick_ignore = [
     ("py:obj", "sghi.etl.commons.processors._RDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.sinks._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.sources._RDT"),  # private type annotations
+    ("py:obj", "sghi.etl.commons.workflow_builder._RDT"),  # private type annotations
+    ("py:obj", "sghi.etl.commons.workflow_builder._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.workflow_definitions._RDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.workflow_definitions._PDT"),  # private type annotations
 ]
