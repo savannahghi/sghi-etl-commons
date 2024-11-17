@@ -1,3 +1,17 @@
+## [1.1.0-rc.3](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0-rc.2...v1.1.0-rc.3) (2024-11-17)
+
+
+### Features
+
+* **workflow-builder:** add a `WorkflowBuilder` ([#27](https://github.com/savannahghi/sghi-etl-commons/issues/27)) ([53aee40](https://github.com/savannahghi/sghi-etl-commons/commit/53aee40cb9f8573b9b681a455fb745bf665f5195))
+
+
+### Refactors
+
+* **processors:** delay embedded processors disposal ([#25](https://github.com/savannahghi/sghi-etl-commons/issues/25)) ([035261c](https://github.com/savannahghi/sghi-etl-commons/commit/035261c83e498ce6f902e8bc6931cc60619b89fa))
+* **sinks:** delay embedded sinks disposal ([#26](https://github.com/savannahghi/sghi-etl-commons/issues/26)) ([5df425d](https://github.com/savannahghi/sghi-etl-commons/commit/5df425d210076518c9ba327df476e8504e31c5a9))
+* **sources:** delay embedded sources disposal ([#24](https://github.com/savannahghi/sghi-etl-commons/issues/24)) ([7f1e585](https://github.com/savannahghi/sghi-etl-commons/commit/7f1e58560e79cfd8b5e9a3b9c87a3b7c98b212d3))
+
 ## [1.1.0-rc.2](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2024-06-04)
 
 
