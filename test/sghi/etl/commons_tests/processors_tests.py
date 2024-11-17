@@ -3,19 +3,70 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import time
+from collections.abc import Iterable, Sequence
+from io import StringIO
 from unittest import TestCase
 
 import pytest
 from typing_extensions import override
 
-from sghi.disposable import ResourceDisposedError
-from sghi.etl.commons import NOOPProcessor, ProcessorPipe, processor
+from sghi.disposable import ResourceDisposedError, not_disposed
+from sghi.etl.commons import (
+    NOOPProcessor,
+    ProcessorPipe,
+    ScatterGatherProcessor,
+    SplitGatherProcessor,
+    processor,
+)
 from sghi.etl.core import Processor
 from sghi.task import task
 
-if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+
+class _IntsToChars(Processor[Iterable[int], Iterable[str]]):
+    """Streaming `ints` to `chars` converter.
+
+    This is equivalent to:
+
+    .. code-block:: python
+
+       @processor
+       def ints_to_chars(ints: Iterable[int]) -> Iterable[str]:
+           yield from map(chr, ints)
+
+    But has state to simulate a stateful streaming processor.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._buffer: StringIO = StringIO(newline="")
+
+    @property
+    @override
+    def is_disposed(self) -> bool:
+        return self._buffer.closed
+
+    @not_disposed
+    @override
+    def apply(self, raw_data: Iterable[int]) -> Iterable[str]:
+        for _int in raw_data:
+            self._buffer.write(chr(_int))
+        self._buffer.seek(0)
+        while _str := self._buffer.read(1):
+            yield _str
+
+    @override
+    def dispose(self) -> None:
+        self._buffer.close()
+
+
+# =============================================================================
+# TESTS
+# =============================================================================
 
 
 def test_processor_decorator_delegates_to_the_wrapped_callable() -> None:
@@ -204,16 +255,12 @@ class TestProcessorPipe(TestCase):
             yield from (v + 65 for v in ints)
 
         @processor
-        def ints_to_chars(ints: Iterable[int]) -> Iterable[str]:
-            yield from map(chr, ints)
-
-        @processor
         def join_chars(values: Iterable[str]) -> str:
             return "".join(list(values))
 
         self._embedded_processors: Sequence[Processor] = [
             add_65,
-            ints_to_chars,
+            _IntsToChars(),
             join_chars,
         ]
         self._instance: Processor[Iterable[int], str] = ProcessorPipe(
@@ -309,6 +356,431 @@ class TestProcessorPipe(TestCase):
 
         with pytest.raises(ResourceDisposedError):
             self._instance.apply(range(5))
+
+        with pytest.raises(ResourceDisposedError):
+            self._instance.__enter__()
+
+
+class TestScatterGatherProcessor(TestCase):
+    """Tests for the :class:`sghi.etl.commons.ScatterGatherProcessor` class."""
+
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+
+        @processor
+        def add_100(value: int) -> int:
+            return value + 100
+
+        @processor
+        def mul_by_10(value: int) -> int:
+            time.sleep(0.5)  # simulate IO blocking
+            return value * 10
+
+        @processor
+        def sub_50(value: int) -> int:
+            return value - 50
+
+        self._embedded_processors: Sequence[Processor] = [
+            add_100,
+            mul_by_10,
+            sub_50,
+        ]
+        self._instance: Processor[int, Sequence[int]]
+        self._instance = ScatterGatherProcessor(self._embedded_processors)
+
+    @override
+    def tearDown(self) -> None:
+        super().tearDown()
+        self._instance.dispose()
+
+    def test_apply_returns_the_expected_value(self) -> None:
+        """:meth:`ScatterGatherProcessor.apply` should return the result of
+        aggregating the outputs of applying the given input to all embedded
+        processors contained by the ``ScatterGatherProcessor``.
+        """
+
+        @processor
+        def ints_to_chars(ints: Iterable[int]) -> Iterable[str]:
+            yield from map(chr, ints)
+
+        _processor: Processor[Iterable[int], Sequence[Iterable[str]]]
+        _processor = ScatterGatherProcessor([ints_to_chars, _IntsToChars()])
+        data: Sequence[Iterable[str]] = _processor.apply([65, 66, 67, 68, 69])
+
+        for _d in data:
+            assert tuple(_d) == ("A", "B", "C", "D", "E")
+        assert tuple(self._instance.apply(-45)) == (55, -450, -95)
+
+        _processor.dispose()
+
+    def test_dispose_has_the_intended_side_effects(self) -> None:
+        """Calling :meth:`ScatterGatherProcessor.dispose` should result in the
+        :attr:`ScatterGatherProcessor.is_disposed` property being set to
+        ``True``.
+
+        Each embedded ``Processor`` should also be disposed.
+        """
+        self._instance.dispose()
+
+        assert self._instance.is_disposed
+        for _processor in self._embedded_processors:
+            assert _processor.is_disposed
+
+    def test_instantiation_fails_on_an_empty_processors_arg(self) -> None:
+        """Instantiating a :class:`ScatterGatherProcessor` with an empty
+        ``processors`` argument should raise a :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="NOT be empty") as exp_info:
+            ScatterGatherProcessor(processors=[])
+
+        assert exp_info.value.args[0] == "'processors' MUST NOT be empty."
+
+    def test_instantiation_fails_on_non_callable_executor_factory_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`ScatterGatherProcessor` with a non-callable
+        value for the ``executor_factory`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            ScatterGatherProcessor(
+                processors=self._embedded_processors,
+                executor_factory=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0] == "'executor_factory' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_callable_result_gatherer_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`ScatterGatherProcessor` with a non-callable
+        value for the ``result_gatherer`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            ScatterGatherProcessor(
+                processors=self._embedded_processors,
+                result_gatherer=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0] == "'result_gatherer' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_callable_retry_policy_factory_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`ScatterGatherProcessor` with a non-callable
+        value for the ``retry_policy_factory`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            ScatterGatherProcessor(
+                processors=self._embedded_processors,
+                retry_policy_factory=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0]
+            == "'retry_policy_factory' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_sequence_processors_arg(self) -> None:
+        """Instantiating a :class:`ScatterGatherProcessor` with a non
+        ``Sequence`` ``processors``  argument should raise a :exc:`TypeError`.
+        """
+        values = (None, 67, self._embedded_processors[0])
+        for value in values:
+            with pytest.raises(TypeError, match="Sequence") as exp_info:
+                ScatterGatherProcessor(processors=value)  # type: ignore
+
+            assert (
+                exp_info.value.args[0]
+                == "'processors' MUST be a collections.abc.Sequence object."
+            )
+
+    def test_multiple_dispose_invocations_is_okay(self) -> None:
+        """Calling :meth:`ScatterGatherProcessor.dispose` multiple times should
+        be okay.
+
+        No errors should be raised and the object should remain disposed.
+        """
+        for _ in range(10):
+            try:
+                self._instance.dispose()
+            except Exception as exc:  # noqa: BLE001
+                fail_reason: str = (
+                    "Calling 'ScatterGatherProcessor.dispose()' multiple "
+                    "times should be okay. But the following error was "
+                    f"raised: {exc!s}"
+                )
+                pytest.fail(fail_reason)
+
+            assert self._instance.is_disposed
+            for _processors in self._embedded_processors:
+                assert _processors.is_disposed
+
+    def test_usage_as_a_context_manager_behaves_as_expected(self) -> None:
+        """:class:`ScatterGatherProcessor` instances are valid context managers
+        and should behave correctly when used as so.
+        """
+        with self._instance:
+            result = self._instance.apply(50)
+            assert isinstance(result, Sequence)
+            assert len(result) == len(self._embedded_processors)
+            assert tuple(result) == (150, 500, 0)
+
+        assert self._instance.is_disposed
+        for _processors in self._embedded_processors:
+            assert _processors.is_disposed
+
+    def test_usage_when_is_disposed_fails(self) -> None:
+        """Invoking "resource-aware" methods of a disposed instance should
+        result in an :exc:`ResourceDisposedError` being raised.
+
+        Specifically, invoking the following two methods on a disposed instance
+        should fail:
+
+        - :meth:`ScatterGatherProcessor.__enter__`
+        - :meth:`ScatterGatherProcessor.apply`
+        """
+        self._instance.dispose()
+
+        with pytest.raises(ResourceDisposedError):
+            self._instance.apply(100)
+
+        with pytest.raises(ResourceDisposedError):
+            self._instance.__enter__()
+
+
+class TestSplitGatherProcessor(TestCase):
+    """Tests for the :class:`sghi.etl.commons.SplitGatherProcessor` class."""
+
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+
+        @processor
+        def add_100(value: int) -> int:
+            return value + 100
+
+        @processor
+        def mul_by_10(value: int) -> int:
+            time.sleep(0.5)  # simulate IO blocking
+            return value * 10
+
+        @processor
+        def sub_50(value: int) -> int:
+            return value - 50
+
+        self._embedded_processors: Sequence[Processor] = [
+            add_100,
+            mul_by_10,
+            sub_50,
+        ]
+        self._instance: Processor[Sequence[int], Sequence[int]]
+        self._instance = SplitGatherProcessor(self._embedded_processors)
+
+    @override
+    def tearDown(self) -> None:
+        super().tearDown()
+        self._instance.dispose()
+
+    def test_apply_fails_on_non_sequence_input_value(self) -> None:
+        """:meth:`SplitGatherProcessor.apply` should raise a :exc:`TypeError`
+        when invoked with a non ``Sequence`` argument.
+        """
+        values = (None, 67, self._embedded_processors[0])
+        for value in values:
+            with pytest.raises(TypeError, match="Sequence") as exp_info:
+                self._instance.apply(value)  # type: ignore
+
+            assert (
+                exp_info.value.args[0]
+                == "'raw_data' MUST be a collections.abc.Sequence object."
+            )
+
+    def test_apply_fails_when_input_size_not_equal_no_of_embedded_processors(
+        self,
+    ) -> None:
+        """:meth:`SplitGatherProcessor.apply` should raise a :exc:`ValueError`
+        when invoked with an argument whose size does not equal the number of
+        embedded processors.
+        """
+        values = ([], list(range(5)))
+        for value in values:
+            with pytest.raises(ValueError, match="but got size") as exp_info:
+                self._instance.apply(value)
+
+            assert exp_info.value.args[0] == (
+                "Expected 'raw_data' to be of size "
+                f"{len(self._embedded_processors)} "
+                f"but got size {len(value)} instead."
+            )
+
+    def test_apply_returns_the_expected_value(self) -> None:
+        """:meth:`SplitGatherProcessor.apply` should return the result of
+        applying each embedded processor to each data part of the given raw
+        data.
+        """
+
+        @processor
+        def ints_to_chars(ints: Iterable[int]) -> Iterable[str]:
+            yield from map(chr, ints)
+
+        _processor: Processor[Sequence[Iterable[int]], Sequence[Iterable[str]]]
+        _processor = SplitGatherProcessor([ints_to_chars, _IntsToChars()])
+        processed_data: Sequence[Iterable[str]] = _processor.apply(
+            [range(65, 70), range(70, 75)],
+        )
+
+        assert tuple(processed_data[0]) == ("A", "B", "C", "D", "E")
+        assert tuple(processed_data[1]) == ("F", "G", "H", "I", "J")
+
+        assert tuple(self._instance.apply([-90, 1, 60])) == (10, 10, 10)
+
+        _processor.dispose()
+
+    def test_dispose_has_the_intended_side_effects(self) -> None:
+        """Calling :meth:`SplitGatherProcessor.dispose` should result in the
+        :attr:`SplitGatherProcessor.is_disposed` property being set to
+        ``True``.
+
+        Each embedded ``Processor`` should also be disposed.
+        """
+        self._instance.dispose()
+
+        assert self._instance.is_disposed
+        for _processor in self._embedded_processors:
+            assert _processor.is_disposed
+
+    def test_instantiation_fails_on_an_empty_processors_arg(self) -> None:
+        """Instantiating a :class:`SplitGatherProcessor` with an empty
+        ``processors`` argument should raise a :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="NOT be empty") as exp_info:
+            SplitGatherProcessor(processors=[])
+
+        assert exp_info.value.args[0] == "'processors' MUST NOT be empty."
+
+    def test_instantiation_fails_on_non_callable_executor_factory_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`SplitGatherProcessor` with a non-callable
+        value for the ``executor_factory`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            SplitGatherProcessor(
+                processors=self._embedded_processors,
+                executor_factory=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0] == "'executor_factory' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_callable_result_gatherer_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`SplitGatherProcessor` with a non-callable
+        value for the ``result_gatherer`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            SplitGatherProcessor(
+                processors=self._embedded_processors,
+                result_gatherer=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0] == "'result_gatherer' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_callable_retry_policy_factory_arg(
+        self,
+    ) -> None:
+        """Instantiating a :class:`SplitGatherProcessor` with a non-callable
+        value for the ``retry_policy_factory`` argument should raise a
+        :exc:`ValueError`.
+        """
+        with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
+            SplitGatherProcessor(
+                processors=self._embedded_processors,
+                retry_policy_factory=None,  # type: ignore
+            )
+
+        assert (
+            exp_info.value.args[0]
+            == "'retry_policy_factory' MUST be a callable."
+        )
+
+    def test_instantiation_fails_on_non_sequence_processors_arg(self) -> None:
+        """Instantiating a :class:`SplitGatherProcessor` with a non
+        ``Sequence`` ``processors``  argument should raise a :exc:`TypeError`.
+        """
+        values = (None, 67, self._embedded_processors[0])
+        for value in values:
+            with pytest.raises(TypeError, match="Sequence") as exp_info:
+                SplitGatherProcessor(processors=value)  # type: ignore
+
+            assert (
+                exp_info.value.args[0]
+                == "'processors' MUST be a collections.abc.Sequence object."
+            )
+
+    def test_multiple_dispose_invocations_is_okay(self) -> None:
+        """Calling :meth:`SplitGatherProcessor.dispose` multiple times should
+        be okay.
+
+        No errors should be raised and the object should remain disposed.
+        """
+        for _ in range(10):
+            try:
+                self._instance.dispose()
+            except Exception as exc:  # noqa: BLE001
+                fail_reason: str = (
+                    "Calling 'SplitGatherProcessor.dispose()' multiple times "
+                    "should be okay. But the following error was raised: "
+                    f"{exc!s}"
+                )
+                pytest.fail(fail_reason)
+
+            assert self._instance.is_disposed
+            for _processors in self._embedded_processors:
+                assert _processors.is_disposed
+
+    def test_usage_as_a_context_manager_behaves_as_expected(self) -> None:
+        """:class:`SplitGatherProcessor` instances are valid context managers
+        and should behave correctly when used as so.
+        """
+        with self._instance:
+            result = self._instance.apply([-100, 0, 50])
+            assert isinstance(result, Sequence)
+            assert len(result) == len(self._embedded_processors)
+            assert tuple(result) == (0, 0, 0)
+
+        assert self._instance.is_disposed
+        for _processors in self._embedded_processors:
+            assert _processors.is_disposed
+
+    def test_usage_when_is_disposed_fails(self) -> None:
+        """Invoking "resource-aware" methods of a disposed instance should
+        result in an :exc:`ResourceDisposedError` being raised.
+
+        Specifically, invoking the following two methods on a disposed instance
+        should fail:
+
+        - :meth:`SplitGatherProcessor.__enter__`
+        - :meth:`SplitGatherProcessor.apply`
+        """
+        self._instance.dispose()
+
+        with pytest.raises(ResourceDisposedError):
+            self._instance.apply([-100, 0, 50])
 
         with pytest.raises(ResourceDisposedError):
             self._instance.__enter__()
