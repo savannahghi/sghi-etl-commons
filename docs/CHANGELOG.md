@@ -1,3 +1,24 @@
+## [1.1.0](https://github.com/savannahghi/sghi-etl-commons/compare/v1.0.0...v1.1.0) (2024-11-17)
+
+
+### Features
+
+* **processors:** add a `ScatterGatherProcessor` ([#19](https://github.com/savannahghi/sghi-etl-commons/issues/19)) ([a7d4387](https://github.com/savannahghi/sghi-etl-commons/commit/a7d43871ebbf071324ccac2acf86ae61a71b0b2d))
+* **processors:** add a `SplitGatherProcessor` ([#17](https://github.com/savannahghi/sghi-etl-commons/issues/17)) ([4439c11](https://github.com/savannahghi/sghi-etl-commons/commit/4439c11724fe1630d2f53e3cc4be8ebc798ff352))
+* **sinks:** add a `ScatterSink` ([#21](https://github.com/savannahghi/sghi-etl-commons/issues/21)) ([6274a31](https://github.com/savannahghi/sghi-etl-commons/commit/6274a31ec774e5fd720938360702af8e44994d63))
+* **sinks:** add a `SplitSink` ([#20](https://github.com/savannahghi/sghi-etl-commons/issues/20)) ([ce4d4ee](https://github.com/savannahghi/sghi-etl-commons/commit/ce4d4ee0e3bf1d7b302f4c08f98acd12993ce832))
+* **sources:** add a `GatherSource` ([#15](https://github.com/savannahghi/sghi-etl-commons/issues/15)) ([d64635a](https://github.com/savannahghi/sghi-etl-commons/commit/d64635a66fa058c9c26007d281620491de8b9a7e))
+* **utils:** add a workflow runner utility ([4f26bc9](https://github.com/savannahghi/sghi-etl-commons/commit/4f26bc9f2b24c2db1acff289c7545b0dc68d0203))
+* **workflow-builder:** add a `WorkflowBuilder` ([#27](https://github.com/savannahghi/sghi-etl-commons/issues/27)) ([53aee40](https://github.com/savannahghi/sghi-etl-commons/commit/53aee40cb9f8573b9b681a455fb745bf665f5195))
+
+
+### Refactors
+
+* **deps-dev:** bump braces from 3.0.2 to 3.0.3 ([#29](https://github.com/savannahghi/sghi-etl-commons/issues/29)) ([118f4ba](https://github.com/savannahghi/sghi-etl-commons/commit/118f4ba9498cf2267c679e65ae5474d01b247140))
+* **processors:** delay embedded processors disposal ([#25](https://github.com/savannahghi/sghi-etl-commons/issues/25)) ([035261c](https://github.com/savannahghi/sghi-etl-commons/commit/035261c83e498ce6f902e8bc6931cc60619b89fa))
+* **sinks:** delay embedded sinks disposal ([#26](https://github.com/savannahghi/sghi-etl-commons/issues/26)) ([5df425d](https://github.com/savannahghi/sghi-etl-commons/commit/5df425d210076518c9ba327df476e8504e31c5a9))
+* **sources:** delay embedded sources disposal ([#24](https://github.com/savannahghi/sghi-etl-commons/issues/24)) ([7f1e585](https://github.com/savannahghi/sghi-etl-commons/commit/7f1e58560e79cfd8b5e9a3b9c87a3b7c98b212d3))
+
 ## [1.1.0-rc.3](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0-rc.2...v1.1.0-rc.3) (2024-11-17)
 
 
