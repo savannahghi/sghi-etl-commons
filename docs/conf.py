@@ -92,6 +92,7 @@ nitpick_ignore = [
     ("py:exc", "ResourceDisposedError"),  # docs aren't published yet
     ("py:exc", "sghi.disposable.ResourceDisposedError"),  # docs aren't published yet
     ("py:func", "sghi.disposable.not_disposed"),  # docs aren't published yet
+    ("py:meth", "sghi.etl.core.Processor.apply"),  # docs aren't published yet
     ("py:meth", "sghi.etl.core.Source.draw"),  # docs aren't published yet
     ("py:obj", "sghi.etl.commons.processors._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.processors._RDT"),  # private type annotations
