@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from contextlib import ExitStack
@@ -803,7 +804,11 @@ class SplitGatherProcessor(
 
 @final
 class _ProcessorOfCallable(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
-    __slots__ = ("_delegate_to", "_is_disposed", "_logger")
+    # See: https://github.com/python/cpython/pull/106771
+    if sys.version_info[:3] >= (3, 13, 0):  # pragma: no cover
+        __slots__ = ("_delegate_to", "_is_disposed", "_logger", "__dict__")
+    else:  # pragma: no cover
+        __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
     def __init__(self, delegate_to: _ProcessorCallable[_RDT, _PDT]) -> None:
         super().__init__()
