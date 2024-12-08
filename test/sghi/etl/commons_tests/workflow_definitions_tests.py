@@ -81,7 +81,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
         for invalid_id in invalid_ids:
             with pytest.raises(TypeError, match="be a string") as exp_info:
                 SimpleWorkflowDefinition(
-                    id=invalid_id,  # type: ignore
+                    id=invalid_id,  # type: ignore[reportArgumentType]
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
                 )
@@ -111,7 +111,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
             with pytest.raises(TypeError, match="be a string") as exp_info:
                 SimpleWorkflowDefinition(
                     id="test_workflow",
-                    name=invalid_name,  # type: ignore
+                    name=invalid_name,  # type: ignore[reportArgumentType]
                     source_factory=_ints_supplier_factory,
                 )
 
@@ -142,7 +142,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                 SimpleWorkflowDefinition(
                     id="test_workflow",
                     name="Test Workflow",
-                    source_factory=invalid_src_factory,  # type: ignore
+                    source_factory=invalid_src_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -162,7 +162,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    description=invalid_description,  # type: ignore
+                    description=invalid_description,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -183,7 +183,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    processor_factory=invalid_prc_factory,  # type: ignore
+                    processor_factory=invalid_prc_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -204,7 +204,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    sink_factory=invalid_sink_factory,  # type: ignore
+                    sink_factory=invalid_sink_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (

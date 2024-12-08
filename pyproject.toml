@@ -67,7 +67,7 @@ test = [
     "pytest-forked~=1.6.0",
     "pytest-sugar~=1.0.0",
     "pytest-xdist~=3.6.1",
-    "ruff~=0.7.4",
+    "ruff~=0.8.2",
     "tox~=4.23.2",
     "tox-gh-actions~=3.2.0",
 ]
@@ -189,6 +189,7 @@ exclude = [
     "venv",
 ]
 line-length = 79
+namespace-packages = ["sghi/etl"]
 src = ["src", "test"]
 target-version = "py311"
 
@@ -202,8 +203,6 @@ skip-magic-trailing-comma = false
 ignore = [
     "ANN002",
     "ANN003",
-    "ANN101",
-    "ANN102",
     "ANN204",
     "COM812",
     "D203",
@@ -212,36 +211,61 @@ ignore = [
     "S101",
 ]
 select = [
-    "A",   # flake8-builtins
-    "ANN", # flake8-annotations
-    "B",   # flake8-bugbear
-    "BLE", # flake8-blind-except
-    "C4",  # flake8-comprehensions
-    "C90", # mccabe
-    "COM", # flake8-commas
-    "D",   # pydocstyle
-    "E",   # pycodestyle Error
-    "EM",  # flake8-errmsg
-    "ERA", # eradicate
-    "F",   # pyflakes
-    "G",   # flake8-logging-format
-    "I",   # isort
-    "ISC", # flake8-implicit-str-concat
-    "N",   # pep8 Naming
-    "PD",  # pandas-vet
-    "PT",  # flake8-pytest-style
-    "PYI", # flake8-pyi
-    "Q",   # flake8-quotes
-    "RET", # flake8-return
-    "RUF", # Ruff-specific rules
-    "S",   # flake8-bandit
-    "SIM", # flake8-simplify
-    "T10", # flake8-debugger
-    "T20", # flake8-print
-    "TCH", # flake8-type-checking
-    "UP",  # pyupgrade
-    "W",   # pycodestyle Warning
-    "YTT", # flake8-2020
+    "A",     # flake8-builtins
+    "ANN",   # flake8-annotations
+    "ARG",   # flake8-unused-arguments
+    "ASYNC", # flake8-async
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "C4",    # flake8-comprehensions
+    "C90",   # mccabe
+    "COM",   # flake8-commas
+    "D",     # pydocstyle
+    "DTZ",   # flake8-datetimez
+    "E",     # pycodestyle Error
+    "EM",    # flake8-errmsg
+    "ERA",   # eradicate
+    "EXE",   # flake8-executable
+    "F",     # pyflakes
+    "FA",    # flake8-future-annotations
+    "FBT",   # flake8-boolean-trap
+    "FLY",   # flynt
+    "FURB",  # refurb
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "ICN",   # flake8-import-conventions
+    "INP",   # flake8-no-pep420
+    "INT",   # flake8-gettext
+    "ISC",   # flake8-implicit-str-concat
+    "LOG",   # flake8-logging
+    "N",     # pep8 Naming
+    "NPY",   # NumPy-specific rules
+    "PERF",  # Perflint
+    "PD",    # pandas-vet
+    "PIE",   # flake8-pie
+    "PGH",   # pygrep-hooks
+    "PL",    # Pylint
+    "PT",    # flake8-pytest-style
+    "PTH",   # flake8-use-pathlib
+    "PYI",   # flake8-pyi
+    "Q",     # flake8-quotes
+    "RET",   # flake8-return
+    "RSE",   # flake8-raise
+    "RUF",   # Ruff-specific rules
+    "S",     # flake8-bandit
+    "SIM",   # flake8-simplify
+    "SLF",   # flake8-self
+    "SLOT",  # flake8-slots
+    "T10",   # flake8-debugger
+    "T20",   # flake8-print
+    "TC",    # flake8-type-checking
+    "TCH",   # flake8-type-checking
+    "TD",    # flake8-todos
+    "TID",   # flake8-tidy-imports
+    "TRY",   # tryceratops
+    "UP",    # pyupgrade
+    "W",     # pycodestyle Warning
+    "YTT",   # flake8-2020
 ]
 
 [tool.ruff.lint.flake8-quotes]
@@ -265,7 +289,7 @@ where = ["src"]
 root = "."
 
 [tool.tox]
-env_list = ["py311", "py312", "py313", "coveralls", "docs", "package"]
+env_list = ["py31{1,2,3}", "coveralls", "docs", "package"]
 isolated_build = true
 requires = ["tox>=4.23.2", "tox-uv>=1.16.0"]
 no_package = false
@@ -298,6 +322,7 @@ description = "submit coverage results to coverall.io"
 depends = ["env_run_base"]
 extras = ["coveralls"]
 pass_env = ["COVERALLS_REPO_TOKEN", "GITHUB_*"]
+skip_install = true
 
 [tool.tox.env.docs]
 changedir = "docs"

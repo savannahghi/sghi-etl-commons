@@ -100,20 +100,20 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     """  # noqa: D205
 
     __slots__ = (
-        "_id",
-        "_name",
-        "_description",
-        "_source_factories",
-        "_processor_factories",
-        "_sink_factories",
-        "_default_processor_factory",
-        "_default_sink_factory",
-        "_composite_source_factory",
         "_composite_processor_factory",
         "_composite_sink_factory",
+        "_composite_source_factory",
+        "_default_processor_factory",
+        "_default_sink_factory",
+        "_description",
+        "_id",
+        "_name",
+        "_processor_factories",
+        "_sink_factories",
+        "_source_factories",
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         id: str,  # noqa: A002
         name: str,
@@ -333,6 +333,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def composite_processor_factory(
         self,
         __composite_processor_factory: _CompositeProcessorFactory,
+        /,
     ) -> None:
         r"""Set the factory function used to combine multiple ``Processor``\ s.
 
@@ -366,6 +367,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def composite_sink_factory(
         self,
         __composite_sink_factory: _CompositeSinkFactory,
+        /,
     ) -> None:
         r"""Set the factory function used to combine multiple ``Sink``\ s.
 
@@ -399,6 +401,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def composite_source_factory(
         self,
         __composite_source_factory: _CompositeSourceFactory,
+        /,
     ) -> None:
         r"""Set the factory function used to combine multiple ``Source``\ s.
 
@@ -432,6 +435,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def default_processor_factory(
         self,
         __default_processor_factory: _ProcessorFactory[_RDT, _PDT],
+        /,
     ) -> None:
         r"""Set the factory function used to create default ``Processor``\ s.
 
@@ -466,6 +470,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def default_sink_factory(
         self,
         __default_sink_factory: _SinkFactory[_PDT],
+        /,
     ) -> None:
         r"""Set the factory function used to create default ``Sink``\ s.
 
@@ -489,7 +494,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         return self._description
 
     @description.setter
-    def description(self, __description: str | None) -> None:
+    def description(self, __description: str | None, /) -> None:
         r"""Set the description of the assembled ``WorkflowDefinition``\ (s).
 
         :param __description: An optional textual description of the assembled
@@ -510,7 +515,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         return self._id
 
     @id.setter
-    def id(self, __id: str) -> None:
+    def id(self, __id: str, /) -> None:
         r"""Set an identifier for the assembled ``WorkflowDefinition``\ (s).
 
         :param __id: A unique identifier to assign to the assembled
@@ -534,7 +539,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         return self._name
 
     @name.setter
-    def name(self, __name: str) -> None:
+    def name(self, __name: str, /) -> None:
         r"""Set the name of the assembled ``WorkflowDefinition``\ (s).
 
         :param __name: A name to assign to the created
@@ -575,6 +580,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def processor_factories(
         self,
         __processor_factories: Sequence[_ProcessorFactory[Any, Any]],
+        /,
     ) -> None:
         r"""Set the ``Processor`` factories to use when creating
         ``Processor``\ s for the assembled ``WorkflowDefinition``\ (s).
@@ -618,6 +624,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def sink_factories(
         self,
         __sink_factories: Sequence[_SinkFactory[Any]],
+        /,
     ) -> None:
         r"""Set the ``Sink`` factories to use when creating ``Sink``\ s for the
         assembled ``WorkflowDefinition``\ (s).
@@ -661,6 +668,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     def source_factories(
         self,
         __source_factories: Sequence[_SourceFactory[Any]],
+        /,
     ) -> None:
         r"""Set the ``Source`` factories to use when creating ``Source``\ s
         for the assembled ``WorkflowDefinition``\ (s).

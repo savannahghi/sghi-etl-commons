@@ -77,7 +77,7 @@ def test_run_workflow_fails_on_non_callable_input() -> None:
     wf = _workflow_factory_generator([])
     for non_callable in (None, wf()):
         with pytest.raises(ValueError, match="callable object.") as exp_info:
-            run_workflow(wf=non_callable)  # type: ignore
+            run_workflow(wf=non_callable)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'wf' MUST be a valid callable object."

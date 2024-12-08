@@ -45,7 +45,7 @@ class SimpleWorkflowDefinition(
 ):
     """A simple :class:`WorkflowDefinition` implementation."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         id: str,  # noqa: A002
         name: str,

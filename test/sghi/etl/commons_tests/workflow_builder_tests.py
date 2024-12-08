@@ -1,4 +1,4 @@
-# ruff: noqa: D205
+# ruff: noqa: D205, PLR2004
 """Tests for the :module:`sghi.etl.commons.workflow_builder` module."""
 
 from __future__ import annotations
@@ -105,7 +105,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_processor in (None, 1, 5.2, str, NullSink()):
             with pytest.raises(TypeError, match="Processor") as exp_info:
-                self._instance1.applies_processor(non_processor)  # type: ignore
+                self._instance1.applies_processor(non_processor)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -159,7 +159,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_processor in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Processor") as exp_info:
-                self._instance1.apply_processor(non_processor)  # type: ignore
+                self._instance1.apply_processor(non_processor)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'processor' MUST be an 'sghi.etl.core.Processor' "
@@ -434,7 +434,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_processor_factory = non_callable  # type: ignore
+                self._instance1.composite_processor_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -487,7 +487,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_sink_factory = non_callable  # type: ignore
+                self._instance1.composite_sink_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -542,7 +542,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_source_factory = non_callable  # type: ignore
+                self._instance1.composite_source_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -590,7 +590,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.default_processor_factory = non_callable  # type: ignore
+                self._instance1.default_processor_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -638,7 +638,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.default_sink_factory = non_callable  # type: ignore
+                self._instance1.default_sink_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -677,7 +677,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.name = non_str  # type: ignore
+                self._instance1.name = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'name' MUST be a string."
 
@@ -695,7 +695,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_sink in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Sink") as exp_info:
-                self._instance1.drain_to(non_sink)  # type: ignore
+                self._instance1.drain_to(non_sink)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'sink' MUST be an 'sghi.etl.core.Sink' instance or a "
@@ -754,7 +754,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_sink in (None, 1, 5.2, str, Zero()):
             with pytest.raises(TypeError, match="Sink") as exp_info:
-                self._instance1.drains_to(non_sink)  # type: ignore
+                self._instance1.drains_to(non_sink)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -808,7 +808,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_source in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Source") as exp_info:
-                self._instance1.draw_from(non_source)  # type: ignore
+                self._instance1.draw_from(non_source)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'source' MUST be an 'sghi.etl.core.Source' instance or a "
@@ -868,7 +868,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_source in (None, 1, 5.2, str, NOOPProcessor()):
             with pytest.raises(TypeError, match="Source") as exp_info:
-                self._instance1.draws_from(non_source)  # type: ignore
+                self._instance1.draws_from(non_source)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -939,7 +939,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.id = non_str  # type: ignore
+                self._instance1.id = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'id' MUST be a string."
 
@@ -999,7 +999,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.name = non_str  # type: ignore
+                self._instance1.name = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'name' MUST be a string."
 
@@ -1047,7 +1047,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.processor_factories = non_str  # type: ignore
+                self._instance1.processor_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -1092,7 +1092,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.sink_factories = non_str  # type: ignore
+                self._instance1.sink_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -1138,7 +1138,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.source_factories = non_str  # type: ignore
+                self._instance1.source_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
