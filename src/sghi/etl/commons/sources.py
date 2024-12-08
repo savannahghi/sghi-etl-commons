@@ -125,15 +125,15 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
     """
 
     __slots__ = (
-        "_sources",
-        "_retry_policy_factory",
+        "_executor",
         "_executor_factory",
-        "_result_gatherer",
+        "_exit_stack",
         "_is_disposed",
         "_logger",
-        "_exit_stack",
         "_prepped_sources",
-        "_executor",
+        "_result_gatherer",
+        "_retry_policy_factory",
+        "_sources",
     )
 
     def __init__(
@@ -302,7 +302,7 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
 class _SourceOfCallable(Source[_RDT], Generic[_RDT]):
     # See: https://github.com/python/cpython/pull/106771
     if sys.version_info[:3] >= (3, 13, 0):  # pragma: no cover
-        __slots__ = ("_delegate_to", "_is_disposed", "_logger", "__dict__")
+        __slots__ = ("__dict__", "_delegate_to", "_is_disposed", "_logger")
     else:  # pragma: no cover
         __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 

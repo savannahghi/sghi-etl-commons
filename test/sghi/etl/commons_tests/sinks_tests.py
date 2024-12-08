@@ -1,4 +1,4 @@
-# ruff: noqa: D205
+# ruff: noqa: D205, PLR2004
 """Tests for the :module:`sghi.etl.commons.sinks` module."""
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def test_sink_decorator_fails_on_non_callable_input_value() -> None:
     non-callable` value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        sink("Not a function")  # type: ignore
+        sink("Not a function")  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -45,7 +45,7 @@ def test_sink_decorator_fails_on_a_none_input_value() -> None:
     value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        sink(None)  # type: ignore
+        sink(None)  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -166,6 +166,7 @@ class TestNullSink(TestCase):
             instance.drain("some processed data.")
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             instance.__enter__()
 
 
@@ -244,7 +245,7 @@ class TestScatterSink(TestCase):
         the ``executor_factory`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            ScatterSink(sinks=self._embedded_sinks, executor_factory=None)  # type: ignore
+            ScatterSink(sinks=self._embedded_sinks, executor_factory=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'executor_factory' MUST be a callable."
@@ -257,7 +258,7 @@ class TestScatterSink(TestCase):
         the ``result_gatherer`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            ScatterSink(sinks=self._embedded_sinks, result_gatherer=None)  # type: ignore
+            ScatterSink(sinks=self._embedded_sinks, result_gatherer=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'result_gatherer' MUST be a callable."
@@ -270,7 +271,7 @@ class TestScatterSink(TestCase):
         the ``retry_policy_factory`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            ScatterSink(sinks=self._embedded_sinks, retry_policy_factory=None)  # type: ignore
+            ScatterSink(sinks=self._embedded_sinks, retry_policy_factory=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0]
@@ -284,7 +285,7 @@ class TestScatterSink(TestCase):
         values = (None, 67, self._embedded_sinks[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                ScatterSink(sinks=value)  # type: ignore
+                ScatterSink(sinks=value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -345,6 +346,7 @@ class TestScatterSink(TestCase):
             self._instance.drain([10, 10, 0])
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             self._instance.__enter__()
 
 
@@ -395,7 +397,7 @@ class TestSplitSink(TestCase):
         values = (None, 67, self._embedded_sinks[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance.drain(value)  # type: ignore
+                self._instance.drain(value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -449,7 +451,7 @@ class TestSplitSink(TestCase):
         ``executor_factory`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            SplitSink(sinks=self._embedded_sinks, executor_factory=None)  # type: ignore
+            SplitSink(sinks=self._embedded_sinks, executor_factory=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'executor_factory' MUST be a callable."
@@ -462,7 +464,7 @@ class TestSplitSink(TestCase):
         ``result_gatherer`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            SplitSink(sinks=self._embedded_sinks, result_gatherer=None)  # type: ignore
+            SplitSink(sinks=self._embedded_sinks, result_gatherer=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'result_gatherer' MUST be a callable."
@@ -475,7 +477,7 @@ class TestSplitSink(TestCase):
         ``retry_policy_factory`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-            SplitSink(sinks=self._embedded_sinks, retry_policy_factory=None)  # type: ignore
+            SplitSink(sinks=self._embedded_sinks, retry_policy_factory=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0]
@@ -489,7 +491,7 @@ class TestSplitSink(TestCase):
         values = (None, 67, self._embedded_sinks[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                SplitSink(sinks=value)  # type: ignore
+                SplitSink(sinks=value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -546,4 +548,5 @@ class TestSplitSink(TestCase):
             self._instance.drain([10, 10])
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             self._instance.__enter__()

@@ -1,3 +1,4 @@
+# ruff: noqa: D205, PLR2004
 """Tests for the ``sghi.etl.commons.utils.result_gatherers`` module."""
 
 from __future__ import annotations
@@ -48,12 +49,12 @@ def _create_futures_with_one_failed(
 def test_fail_fast_fails_when_given_invalid_args() -> None:
     """:func:`sghi.etl.commons.utils.fail_fast` should fail when given invalid
     args.
-    """  # noqa: D205
+    """
     with pytest.raises(TypeError, match="MUST be an Iterable") as exp_info1:
-        fail_fast(None)  # type: ignore
+        fail_fast(None)  # type: ignore[reportArgumentType]
 
     with pytest.raises(ValueError, match="MUST be a callable") as exp_info2:
-        fail_fast(_create_successful_features(), exc_wrapper_factory="oops")  # type: ignore
+        fail_fast(_create_successful_features(), exc_wrapper_factory="oops")  # type: ignore[reportArgumentType]
 
     assert exp_info1.value.args[0] == "'futures' MUST be an Iterable."
     assert (
@@ -67,7 +68,7 @@ def test_fail_fast_returns_iterable_even_with_failed_futures_present() -> None:
     ``Iterable`` and not raise any exception for valid input args.
 
     This should hold even if the any of the provided futures failed.
-    """  # noqa: D205
+    """
     # noinspection PyBroadException
     try:
         results = fail_fast(
@@ -79,14 +80,14 @@ def test_fail_fast_returns_iterable_even_with_failed_futures_present() -> None:
             "inputs."
         )
         pytest.fail(fail_reason)
-
-    assert isinstance(results, Iterable)
+    else:
+        assert isinstance(results, Iterable)
 
 
 def test_fail_fast_return_value_when_futures_are_successful() -> None:
     """:func:`sghi.etl.commons.utils.fail_fast` should return an ``Iterable``
     of the gathered results if no future failed..
-    """  # noqa: D205
+    """
     results = fail_fast(_create_successful_features(count=5))
 
     assert isinstance(results, Iterable)
@@ -99,7 +100,7 @@ def test_fail_fast_return_value_with_failed_futures_no_exc_wrapper() -> None:
 
     Consuming the returned ``Iterable`` should raise an error at the first
     encounter of the non-successful result.
-    """  # noqa: D205
+    """
     results = fail_fast(_create_futures_with_one_failed(5, failed_index=2))
 
     assert isinstance(results, Iterable)
@@ -120,7 +121,7 @@ def test_fail_fast_return_value_with_failed_futures_and_exc_wrapper() -> None:
     encounter of the non-successful result. When ``exc_wrapper_factory`` is
     provided, the raised error should be that returned by the factory with its
     ``__cause__`` attribute set to the original error.
-    """  # noqa: D205
+    """
     results = fail_fast(
         futures=_create_futures_with_one_failed(5, failed_index=3),
         exc_wrapper_factory=RuntimeError,
@@ -142,9 +143,9 @@ def test_fail_fast_return_value_with_failed_futures_and_exc_wrapper() -> None:
 def test_fail_fast_factory_fails_when_given_invalid_args() -> None:
     """:func:`sghi.etl.commons.utils.fail_fast_factory` should raise a
     :exc:`ValueError` when ``exc_wrapper_factory`` is not a callable object.
-    """  # noqa: D205
+    """
     with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
-        fail_fast_factory(exc_wrapper_factory="not a callable")  # type: ignore
+        fail_fast_factory(exc_wrapper_factory="not a callable")  # type: ignore[reportArgumentType]
 
     assert (
         exp_info.value.args[0] == "'exc_wrapper_factory' MUST be a callable."
@@ -160,7 +161,7 @@ def test_fail_fast_factory_returns_expected_value() -> None:
     encounter of the non-successful result. The raised error should be that
     returned by the provided ``exc_wrapper_factory`` factory with its
     ``__cause__`` attribute set to the original error.
-    """  # noqa: D205
+    """
     results1 = fail_fast_factory(
         exc_wrapper_factory=RuntimeError,
     )(_create_successful_features(5))
@@ -187,9 +188,9 @@ def test_fail_fast_factory_returns_expected_value() -> None:
 def test_ignore_failed_fails_when_given_invalid_args() -> None:
     """:func:`sghi.etl.commons.utils.ignore_failed` should raise a
     :exc:`TypeError` when ``futures`` is not an ``Iterable`` object.
-    """  # noqa: D205
+    """
     with pytest.raises(TypeError, match="MUST be an Iterable") as exp_info:
-        ignored_failed(None)  # type: ignore
+        ignored_failed(None)  # type: ignore[reportArgumentType]
 
     assert exp_info.value.args[0] == "'futures' MUST be an Iterable."
 
@@ -198,7 +199,7 @@ def test_ignore_failed_returns_expected_value() -> None:
     """:func:`sghi.etl.commons.utils.ignore_failed` should return an
     ``Iterable`` of the gathered results from successful futures of the
     provided set.
-    """  # noqa: D205
+    """
     results1 = ignored_failed(_create_successful_features(5))
     results2 = ignored_failed(
         _create_futures_with_one_failed(5, failed_index=2)
