@@ -42,9 +42,7 @@ requires-python = ">=3.11" # Support Python 3.10+.
 [project.optional-dependencies]
 coveralls = ["coveralls~=4.0.1"]
 
-dev = [
-    "pre-commit~=4.0.1",
-]
+dev = ["pre-commit~=4.0.1"]
 
 docs = [
     "furo==2024.8.6",
@@ -69,7 +67,6 @@ test = [
     "pytest-xdist~=3.6.1",
     "ruff~=0.8.2",
     "tox~=4.23.2",
-    "tox-gh-actions~=3.2.0",
 ]
 
 [project.urls]
@@ -289,14 +286,13 @@ where = ["src"]
 root = "."
 
 [tool.tox]
-env_list = ["py31{1,2,3}", "coveralls", "docs", "package"]
+env_list = ["3.11", "3.12", "3.13", "coveralls", "docs", "package"]
 isolated_build = true
-requires = ["tox>=4.23.2", "tox-uv>=1.16.0"]
+requires = ["tox>=4.23.2", "tox-gh-actions>=3.2.0", "tox-uv>=1.16.0"]
 no_package = false
 skip_missing_interpreters = true
 
 [tool.tox.env_run_base]
-# allowlist_externals = ["uv"]
 commands = [
     ["ruff", "check", "."],
     ["ruff", "format", "--check", "."],
@@ -310,16 +306,20 @@ description = "test and lint the project"
 download = true
 extras = ["test"]
 set_env = { PYTHONPATH = "{toxinidir}/src", PYRIGHT_PYTHON_FORCE_VERSION = "latest" }
+# This is needed to uphold the Python versions specified on GitHub CI
+# and not to break tox-gh-actions.
+uv_python_preference = "only-system"
 
 [tool.tox.env.coveralls]
-# If running outside Github, ensure that the the `COVERALLS_REPO_TOKEN`
+# If running outside GitHub, ensure that the `COVERALLS_REPO_TOKEN`
 # environment variable is set.
 # Also, this only works for Python = ">=3.8,<3.13".
 # See https://github.com/TheKevJames/coveralls-python/issues/523
 base_python = ["py312"]
-commands = [["coveralls", "--service=github"]]
+commands = [["python", "--version"], ["coveralls", "--service=github"]]
 description = "submit coverage results to coverall.io"
 depends = ["env_run_base"]
+deps = ["coveralls"]
 extras = ["coveralls"]
 pass_env = ["COVERALLS_REPO_TOKEN", "GITHUB_*"]
 skip_install = true
@@ -345,7 +345,7 @@ skip_install = true
 
 [tool.tox.gh-actions]
 python = """
-   3.11: py311
-   3.12: py312, coveralls
-   3.13: py313, docs, package
-"""
+        3.11: 3.11
+        3.12: 3.12, coveralls
+        3.13: 3.13, docs, package
+        """
