@@ -36,6 +36,10 @@ def _ints_to_str_mapper_factory() -> Processor[Iterable[int], Iterable[str]]:
     return ints_to_str
 
 
+def _noop() -> None:
+    """Do nothing."""
+
+
 def _printer_factory() -> Sink[Iterable[Any]]:
     return sink(print)
 
@@ -60,6 +64,8 @@ class TestSimpleWorkflowDefinitions(TestCase):
             description="A test workflow that takes ints and prints all them.",
             processor_factory=_ints_to_str_mapper_factory,
             sink_factory=_printer_factory,
+            epilogue=_noop,
+            prologue=_noop,
         )
 
         assert wf_def.id == "test_workflow"
@@ -68,9 +74,11 @@ class TestSimpleWorkflowDefinitions(TestCase):
             wf_def.description
             == "A test workflow that takes ints and prints all them."
         )
+        assert wf_def.prologue is _noop
         assert wf_def.source_factory is _ints_supplier_factory
         assert wf_def.processor_factory is _ints_to_str_mapper_factory
         assert wf_def.sink_factory is _printer_factory
+        assert wf_def.epilogue is _noop
 
     def test_instantiation_fails_on_none_str_id_argument(self) -> None:
         """Instantiating a :class:`SimpleWorkflowDefinition` with a non-string

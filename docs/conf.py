@@ -56,6 +56,8 @@ exclude_patterns = []
 nitpicky = True
 
 nitpick_ignore = [
+    ("py:attr", "sghi.etl.core.WorkflowDefinition.epilogue"),  # docs aren't published yet
+    ("py:attr", "sghi.etl.core.WorkflowDefinition.prologue"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.processor_factory"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.sink_factory"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.source_factory"),  # docs aren't published yet

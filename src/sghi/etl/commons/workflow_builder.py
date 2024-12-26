@@ -53,6 +53,16 @@ _SinkFactory = Callable[[], Sink[_T2]]
 
 _SourceFactory = Callable[[], Source[_T1]]
 
+
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+
+def _noop() -> None:
+    """Do nothing."""
+
+
 # =============================================================================
 # EXCEPTIONS
 # =============================================================================
@@ -97,6 +107,124 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
     :class:`sinks<sghi.etl.core.Sink>`. This builder class offers a convenient
     way to construct workflows by providing methods to register sources,
     processors, and sinks, either individually or using factories.
+
+    Here are a couple of usage examples:
+
+    Example 1
+
+    .. code-block:: python
+       :linenos:
+
+       from sghi.etl.commons import *
+
+       wb = WorkflowBuilder[str, str](id="test1", name="Test Workflow 1")
+
+
+       @source
+       def hello_world() -> str:
+           return "Hello, World!"
+
+
+       wb.draw_from(hello_world).drain_to(sink(print))
+       run_workflow(wb)
+
+    Example 2
+
+    .. code-block:: python
+       :linenos:
+
+       import random
+       from collections.abc import Iterable
+
+       from sghi.etl.commons import *
+
+       wb: WorkflowBuilder[Iterable[int], Iterable[int]]
+       wb = WorkflowBuilder(id="test2", name="Test Workflow 2")
+
+
+       @source
+       def supply_ints() -> Iterable[int]:
+           for _ in range(10):
+               yield random.randint(0, 9)  # noqa: S311
+
+
+       @sink
+       def print_each(values: Iterable[int]) -> None:
+           for value in values:
+               print(value)
+
+
+       wb.draw_from(supply_ints).drain_to(print_each)
+       run_workflow(wb)
+
+    Example 3
+
+    .. code-block:: python
+       :linenos:
+
+       import random
+       from collections.abc import Iterable, Sequence
+
+       from sghi.etl.commons import *
+
+       wb: WorkflowBuilder[Iterable[int], Sequence[str]]
+       wb = WorkflowBuilder(
+           id="test3",
+           name="Test Workflow 3",
+           composite_processor_factory=ProcessorPipe[
+               Iterable[int], Sequence[str]
+           ],
+           composite_sink_factory=ScatterSink[Sequence[str]],
+       )
+
+
+       # SOURCES
+       # ----------------------------------------------------------------------
+       @wb.draws_from
+       @source
+       def supply_ints() -> Iterable[int]:
+           for _ in range(10):
+               yield random.randint(0, 9)  # noqa: S311
+
+
+       # PROCESSORS
+       # ----------------------------------------------------------------------
+       @wb.applies_processor
+       @processor
+       def add_100(values: Iterable[int]) -> Iterable[int]:
+           for v in values:
+               yield v + 100
+
+
+       @wb.applies_processor
+       @processor
+       def ints_as_strings(ints: Iterable[int]) -> Iterable[str]:
+           yield from map(chr, ints)
+
+
+       @wb.applies_processor
+       @processor
+       def values_to_sequence(values: Iterable[str]) -> Sequence[str]:
+           return list(values)
+
+
+       # SINKS
+       # ----------------------------------------------------------------------
+       @wb.drains_to
+       @sink
+       def print_each(values: Sequence[str]) -> None:
+           for value in values:
+               print(value)
+
+
+       @wb.drains_to
+       @sink
+       def print_all(values: Sequence[str]) -> None:
+           print(f"[{", ".join(list(values))}]")
+
+
+       run_workflow(wb)
+
     """  # noqa: D205
 
     __slots__ = (
@@ -106,9 +234,11 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         "_default_processor_factory",
         "_default_sink_factory",
         "_description",
+        "_epilogue",
         "_id",
         "_name",
         "_processor_factories",
+        "_prologue",
         "_sink_factories",
         "_source_factories",
     )
@@ -129,6 +259,8 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         composite_source_factory: _CompositeSourceFactory = GatherSource,
         composite_processor_factory: _CompositeProcessorFactory = ScatterGatherProcessor,  # noqa: E501
         composite_sink_factory: _CompositeSinkFactory = ScatterSink,
+        prologue: Callable[[], None] = _noop,
+        epilogue: Callable[[], None] = _noop,
     ) -> None:
         r"""Create a ``WorkflowBuilder`` of the following properties.
 
@@ -183,6 +315,12 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
             ``Sequence`` of ``Sink`` instances. Defaults to the ``ScatterSink``
             class, which drains data to all its embedded ``Sink``\ s
             concurrently.
+        :param prologue: An optional function to be invoked at the beginning of
+            the assembled workflow(s). This MUST be a valid callable. Defaults
+            to a callable that does nothing when invoked.
+        :param epilogue: An optional function to be invoked at the end of the
+            created workflow(s). This MUST be a valid callable. Defaults to
+            a callable that does nothing when invoked.
 
         :raise TypeError: If ``id`` or ``name`` are NOT of type string. If
             ``description`` is NOT a string when NOT ``None``. If
@@ -192,6 +330,9 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
             ``default_processor_factory``, ``default_sink_factory``,
             ``composite_source_factory``, ``composite_processor_factory`` or
             ``composite_sink_factory`` are NOT valid callable objects.
+
+        .. versionadded:: 1.2.0 The ``epilogue`` parameter.
+        .. versionadded:: 1.2.0 The ``prologue`` parameter.
         """
         super().__init__()
         self._id: str = ensure_not_none_nor_empty(
@@ -268,6 +409,14 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         self._composite_sink_factory = ensure_callable(
             value=composite_sink_factory,
             message="'composite_sink_factory' MUST be a callable object.",
+        )
+        self._prologue: Callable[[], None] = ensure_callable(
+            value=prologue,
+            message="'prologue' MUST be a callable object.",
+        )
+        self._epilogue: Callable[[], None] = ensure_callable(
+            value=epilogue,
+            message="'epilogue' MUST be a callable object.",
         )
 
     def __call__(self) -> WorkflowDefinition[_RDT, _PDT]:
@@ -510,6 +659,38 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         )
 
     @property
+    def epilogue(self) -> Callable[[], None]:
+        r"""A callable to be executed at the end of the assembled
+        ``WorkflowDefinition``\ (s).
+
+        This is always executed regardless of whether the resulting workflows
+        or their :attr:`prologue` callables completed successfully.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        return self._epilogue
+
+    @epilogue.setter
+    def epilogue(self, __epilogue: Callable[[], None], /) -> None:
+        r"""Set the callable to be executed at end of the assembled
+        ``WorkflowDefinition``\ (s).
+
+        :param __epilogue: A callable object to be executed at the end of the
+            resulting workflow(s). This callable is always invoked whenever
+            the resulting workflows are executed. This MUST be a valid
+            callable object.
+
+        :raise ValueError: If the provided value *IS NOT* a valid callable
+            object.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        self._epilogue: Callable[[], None] = ensure_callable(
+            value=__epilogue,
+            message="'epilogue' MUST be a callable object.",
+        )
+
+    @property
     def id(self) -> str:
         """The identifier to assign to the assembled workflow(s)."""
         return self._id
@@ -600,6 +781,41 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
             message="'processor_factories' MUST be a collections.abc.Sequence.",  # noqa: E501
         )
         self._processor_factories = list(__processor_factories)
+
+    @property
+    def prologue(self) -> Callable[[], None]:
+        r"""A callable to be executed at the beginning of the assembled
+        ``WorkflowDefinition``\ (s).
+
+        If the execution of this callable fails, i.e. raises an exception
+        during the execution of the resulting workflow(s), then the rest of the
+        workflow is never executed, only the callable returned by the
+        :attr:`epilogue` property is.
+
+        This can be useful for validating the loaded configuration, setting up
+        certain resources before the "main workflow" execution starts, etc.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        return self._prologue
+
+    @prologue.setter
+    def prologue(self, __prologue: Callable[[], None], /) -> None:
+        r"""Set the callable to be executed at the beginning of the assembled
+        ``WorkflowDefinition``\ (s).
+
+        :param __prologue: A callable object to be executed at the beginning of
+            the resulting workflow(s). This MUST be valid callable object.
+
+        :raise ValueError: If the provided value *IS NOT* a valid callable
+            object.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        self._prologue: Callable[[], None] = ensure_callable(
+            value=__prologue,
+            message="'prologue' MUST be a callable object.",
+        )
 
     @property
     def sink_factories(self) -> Sequence[_SinkFactory[Any]]:
@@ -711,6 +927,8 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
             source_factory=self._build_source_factory(),
             processor_factory=self._build_processor_factory(),
             sink_factory=self._build_sink_factory(),
+            prologue=self._prologue,
+            epilogue=self._epilogue,
         )
 
     # DECORATORS
@@ -836,6 +1054,59 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
         )
         self.draw_from(source)
         return source
+
+    def mark_epilogue(
+        self,
+        epilogue: Callable[[], None],
+    ) -> Callable[[], None]:
+        r"""Set the given/decorated callable to be executed at end of the
+        assembled ``WorkflowDefinition``\ (s).
+
+        This is always executed regardless of whether the resulting workflow(s)
+        or their :attr:`prologue` callable completed successfully.
+
+        :param epilogue: A callable object to be executed at the end of the
+            resulting workflow(s). This callable is always invoked whenever
+            the resulting workflow(s) are executed. This MUST be a valid
+            callable object.
+
+        :return: The given callable as is.
+
+        :raise ValueError: If the provided value *IS NOT* a valid callable
+            object.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        self.epilogue = epilogue
+        return epilogue
+
+    def mark_prologue(
+        self,
+        prologue: Callable[[], None],
+    ) -> Callable[[], None]:
+        r"""Set the given/decorated callable to be executed at beginning of the
+        assembled ``WorkflowDefinition``\ (s).
+
+        If the execution of the given callable fails, i.e. raises an exception
+        during the execution of the resulting workflow(s), then the rest of the
+        workflow is never executed, only the callable returned by the
+        :attr:`epilogue` property is.
+
+        This can be useful for validating the loaded configuration, setting up
+        certain resources before the "main workflow" execution starts, etc.
+
+        :param prologue: A callable object to be executed at the beginning of
+            the resulting workflow(s). This MUST be a valid callable object.
+
+        :return: The given callable as is.
+
+        :raise ValueError: If the provided value *IS NOT* a valid callable
+            object.
+
+        .. versionadded:: 1.2.0
+        """  # noqa: D205
+        self.prologue = prologue
+        return prologue
 
     # FLOW API
     # -------------------------------------------------------------------------
