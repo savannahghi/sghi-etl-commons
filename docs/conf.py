@@ -56,6 +56,8 @@ exclude_patterns = []
 nitpicky = True
 
 nitpick_ignore = [
+    ("py:attr", "sghi.etl.core.WorkflowDefinition.epilogue"),  # docs aren't published yet
+    ("py:attr", "sghi.etl.core.WorkflowDefinition.prologue"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.processor_factory"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.sink_factory"),  # docs aren't published yet
     ("py:attr", "sghi.etl.core.WorkflowDefinition.source_factory"),  # docs aren't published yet
@@ -92,6 +94,7 @@ nitpick_ignore = [
     ("py:exc", "ResourceDisposedError"),  # docs aren't published yet
     ("py:exc", "sghi.disposable.ResourceDisposedError"),  # docs aren't published yet
     ("py:func", "sghi.disposable.not_disposed"),  # docs aren't published yet
+    ("py:meth", "sghi.etl.core.Processor.apply"),  # docs aren't published yet
     ("py:meth", "sghi.etl.core.Source.draw"),  # docs aren't published yet
     ("py:obj", "sghi.etl.commons.processors._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.processors._RDT"),  # private type annotations

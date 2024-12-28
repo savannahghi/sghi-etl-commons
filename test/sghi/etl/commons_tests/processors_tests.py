@@ -1,4 +1,4 @@
-# ruff: noqa: D205
+# ruff: noqa: D205, PLR2004
 """Tests for the :module:`sghi.etl.commons.processors` module."""
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def test_processor_decorator_fails_on_non_callable_input_value() -> None:
     non-callable` value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        processor("Not a function")  # type: ignore
+        processor("Not a function")  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -101,7 +101,7 @@ def test_processor_decorator_fails_on_a_none_input_value() -> None:
     value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        processor(None)  # type: ignore
+        processor(None)  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -240,6 +240,7 @@ class TestNOOPProcessor(TestCase):
             instance.apply("some raw data.")
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             instance.__enter__()
 
 
@@ -283,7 +284,7 @@ class TestProcessorPipe(TestCase):
         ``processors`` argument should raise a :exc:`ValueError`.
         """
         with pytest.raises(ValueError, match="None or empty") as exp_info:
-            ProcessorPipe(processors=None)  # type: ignore
+            ProcessorPipe(processors=None)  # type: ignore[reportArgumentType]
 
         assert (
             exp_info.value.args[0] == "'processors' MUST NOT be None or empty."
@@ -446,7 +447,7 @@ class TestScatterGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             ScatterGatherProcessor(
                 processors=self._embedded_processors,
-                executor_factory=None,  # type: ignore
+                executor_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -463,7 +464,7 @@ class TestScatterGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             ScatterGatherProcessor(
                 processors=self._embedded_processors,
-                result_gatherer=None,  # type: ignore
+                result_gatherer=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -480,7 +481,7 @@ class TestScatterGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             ScatterGatherProcessor(
                 processors=self._embedded_processors,
-                retry_policy_factory=None,  # type: ignore
+                retry_policy_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -495,7 +496,7 @@ class TestScatterGatherProcessor(TestCase):
         values = (None, 67, self._embedded_processors[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                ScatterGatherProcessor(processors=value)  # type: ignore
+                ScatterGatherProcessor(processors=value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -553,6 +554,7 @@ class TestScatterGatherProcessor(TestCase):
             self._instance.apply(100)
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             self._instance.__enter__()
 
 
@@ -596,7 +598,7 @@ class TestSplitGatherProcessor(TestCase):
         values = (None, 67, self._embedded_processors[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance.apply(value)  # type: ignore
+                self._instance.apply(value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -676,7 +678,7 @@ class TestSplitGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             SplitGatherProcessor(
                 processors=self._embedded_processors,
-                executor_factory=None,  # type: ignore
+                executor_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -693,7 +695,7 @@ class TestSplitGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             SplitGatherProcessor(
                 processors=self._embedded_processors,
-                result_gatherer=None,  # type: ignore
+                result_gatherer=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -710,7 +712,7 @@ class TestSplitGatherProcessor(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             SplitGatherProcessor(
                 processors=self._embedded_processors,
-                retry_policy_factory=None,  # type: ignore
+                retry_policy_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -725,7 +727,7 @@ class TestSplitGatherProcessor(TestCase):
         values = (None, 67, self._embedded_processors[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                SplitGatherProcessor(processors=value)  # type: ignore
+                SplitGatherProcessor(processors=value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -783,4 +785,5 @@ class TestSplitGatherProcessor(TestCase):
             self._instance.apply([-100, 0, 50])
 
         with pytest.raises(ResourceDisposedError):
+            # noinspection PyArgumentList
             self._instance.__enter__()

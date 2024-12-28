@@ -35,6 +35,7 @@ class _StreamingSource(Source[Iterable[int]]):
     @override
     def draw(self) -> Iterable[int]:
         for _ in range(3):
+            # noinspection PyArgumentList
             yield from self._do_yield()
         self._yielded = 0
 
@@ -69,7 +70,7 @@ def test_source_decorator_fails_on_non_callable_input_value() -> None:
     non-callable` value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        source("Not a function")  # type: ignore
+        source("Not a function")  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -79,7 +80,7 @@ def test_source_decorator_fails_on_a_none_input_value() -> None:
     value.
     """
     with pytest.raises(ValueError, match="callable object") as exc_info:
-        source(None)  # type: ignore
+        source(None)  # type: ignore[reportArgumentType]
 
     assert exc_info.value.args[0] == "A callable object is required."
 
@@ -213,7 +214,7 @@ class TestGatherSource(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             GatherSource(
                 sources=self._embedded_sources,
-                executor_factory=None,  # type: ignore
+                executor_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -229,7 +230,7 @@ class TestGatherSource(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             GatherSource(
                 sources=self._embedded_sources,
-                result_gatherer=None,  # type: ignore
+                result_gatherer=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -245,7 +246,7 @@ class TestGatherSource(TestCase):
         with pytest.raises(ValueError, match="MUST be a callable") as exp_info:
             GatherSource(
                 sources=self._embedded_sources,
-                retry_policy_factory=None,  # type: ignore
+                retry_policy_factory=None,  # type: ignore[reportArgumentType]
             )
 
         assert (
@@ -260,7 +261,7 @@ class TestGatherSource(TestCase):
         values = (None, 67, self._embedded_sources[0])
         for value in values:
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                GatherSource(sources=value)  # type: ignore
+                GatherSource(sources=value)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]

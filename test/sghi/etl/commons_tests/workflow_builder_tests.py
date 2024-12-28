@@ -1,8 +1,10 @@
-# ruff: noqa: D205
+# ruff: noqa: D205, PLR2004
 """Tests for the :module:`sghi.etl.commons.workflow_builder` module."""
 
 from __future__ import annotations
 
+import os
+import shutil
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Self
 from unittest import TestCase
@@ -37,6 +39,10 @@ if TYPE_CHECKING:
 # =============================================================================
 # TESTS HELPERS
 # =============================================================================
+
+
+def _noop() -> None:
+    """Do nothing."""
 
 
 class Zero(Source[Iterator[int]]):
@@ -96,6 +102,8 @@ class TestWorkflowBuilder(TestCase):
             processor_factories=[NOOPProcessor],
             sink_factories=[NullSink],
             source_factories=[Zero],
+            epilogue=_noop,
+            prologue=_noop,
         )
 
     def test_applies_processor_fails_when_given_invalid_input(self) -> None:
@@ -105,7 +113,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_processor in (None, 1, 5.2, str, NullSink()):
             with pytest.raises(TypeError, match="Processor") as exp_info:
-                self._instance1.applies_processor(non_processor)  # type: ignore
+                self._instance1.applies_processor(non_processor)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -159,7 +167,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_processor in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Processor") as exp_info:
-                self._instance1.apply_processor(non_processor)  # type: ignore
+                self._instance1.apply_processor(non_processor)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'processor' MUST be an 'sghi.etl.core.Processor' "
@@ -434,7 +442,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_processor_factory = non_callable  # type: ignore
+                self._instance1.composite_processor_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -487,7 +495,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_sink_factory = non_callable  # type: ignore
+                self._instance1.composite_sink_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -542,7 +550,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.composite_source_factory = non_callable  # type: ignore
+                self._instance1.composite_source_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -590,7 +598,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.default_processor_factory = non_callable  # type: ignore
+                self._instance1.default_processor_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -638,7 +646,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_callable in (None, 1, 5.2, "not a callable"):
             with pytest.raises(ValueError, match="be a callable") as exp_info:
-                self._instance1.default_sink_factory = non_callable  # type: ignore
+                self._instance1.default_sink_factory = non_callable  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -677,7 +685,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.name = non_str  # type: ignore
+                self._instance1.name = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'name' MUST be a string."
 
@@ -695,7 +703,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_sink in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Sink") as exp_info:
-                self._instance1.drain_to(non_sink)  # type: ignore
+                self._instance1.drain_to(non_sink)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'sink' MUST be an 'sghi.etl.core.Sink' instance or a "
@@ -754,7 +762,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_sink in (None, 1, 5.2, str, Zero()):
             with pytest.raises(TypeError, match="Sink") as exp_info:
-                self._instance1.drains_to(non_sink)  # type: ignore
+                self._instance1.drains_to(non_sink)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -808,7 +816,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_source in (None, 1, 5.2, {}, (), []):
             with pytest.raises(ValueError, match="Source") as exp_info:
-                self._instance1.draw_from(non_source)  # type: ignore
+                self._instance1.draw_from(non_source)  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == (
                 "'source' MUST be an 'sghi.etl.core.Source' instance or a "
@@ -868,12 +876,57 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_source in (None, 1, 5.2, str, NOOPProcessor()):
             with pytest.raises(TypeError, match="Source") as exp_info:
-                self._instance1.draws_from(non_source)  # type: ignore
+                self._instance1.draws_from(non_source)  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
                 == "'source' MUST be an 'sghi.etl.core.Source' instance."
             )
+
+    def test_epilogue_modification_with_valid_value_succeeds(self) -> None:
+        """Setting a callable object to the :attr:`WorkflowBuilder.epilogue`
+        attribute should succeed.
+        """
+
+        def _remove_temp_directories() -> None:
+            shutil.rmtree(
+                path="/tmp/sghi-etl-workflow-tmp-dir",  # noqa: S108
+                ignore_errors=True,
+            )
+
+        try:
+            self._instance1.epilogue = _noop
+            self._instance2.epilogue = _remove_temp_directories
+        except Exception as exp:  # noqa: BLE001
+            _fail_reason: str = (
+                "Setting the 'WorkflowBuilder.epilogue' attribute with a "
+                "callable object SHOULD succeed. However, the following "
+                f"exception was raised: '{exp!r}'."
+            )
+            pytest.fail(reason=_fail_reason)
+
+        assert self._instance1.epilogue is _noop
+        assert self._instance2.epilogue is _remove_temp_directories
+
+    def test_epilogue_modification_with_an_invalid_value_fails(self) -> None:
+        """Setting a non-callable value to the :attr:`WorkflowBuilder.epilogue`
+        attribute should raise a :exc:`ValueError`.
+        """
+        for non_callable in (None, 1, 5.2, "not a callable"):
+            with pytest.raises(ValueError, match="be a callable") as exp_info:
+                self._instance1.epilogue = non_callable  # type: ignore[reportArgumentType]
+
+            assert (
+                exp_info.value.args[0]
+                == "'epilogue' MUST be a callable object."
+            )
+
+    def test_epilogue_return_value(self) -> None:
+        r""":attr:`WorkflowBuilder.epilogue` should return the callable object
+        to execute at the end of the assembled ``WorkflowDefinition``\ (s).
+        """
+        assert callable(self._instance1.epilogue)
+        assert self._instance2.epilogue is _noop
 
     def test_draws_from_return_value(self) -> None:
         """The decorator meth:`WorkflowBuilder.draws_from` should return the
@@ -939,7 +992,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.id = non_str  # type: ignore
+                self._instance1.id = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'id' MUST be a string."
 
@@ -975,6 +1028,122 @@ class TestWorkflowBuilder(TestCase):
         assert workflow_def.processor_factory is NOOPProcessor
         assert workflow_def.sink_factory is NullSink
 
+    def test_mark_epilogue_modification_with_valid_value_succeeds(
+        self,
+    ) -> None:
+        """Invoking the :meth:`WorkflowBuilder.mark_epilogue` method with a
+        valid callable should succeed.
+        """
+        try:
+            self._instance1.mark_epilogue(_noop)
+        except Exception as exp:  # noqa: BLE001
+            _fail_reason: str = (
+                "Invoking the 'WorkflowBuilder.mark_epilogue' method with "
+                "a callable object SHOULD succeed. However, the following "
+                f"exception was raised: '{exp!r}'."
+            )
+            pytest.fail(reason=_fail_reason)
+
+        @self._instance2.mark_epilogue
+        def _remove_temp_directories() -> None:
+            shutil.rmtree(
+                path="/tmp/sghi-etl-workflow-tmp-dir",  # noqa: S108
+                ignore_errors=True,
+            )
+
+        assert self._instance1.epilogue is _noop
+        assert self._instance2.epilogue is _remove_temp_directories
+
+    def test_mark_epilogue_modification_with_an_invalid_value_fails(
+        self,
+    ) -> None:
+        """Passing a non-callable value to the
+        :meth:`WorkflowBuilder.mark_epilogue` method should raise a
+        :exc:`ValueError`.
+        """
+        for non_callable in (None, 1, 5.2, "not a callable"):
+            with pytest.raises(ValueError, match="be a callable") as exp_info:
+                self._instance1.mark_epilogue(non_callable)  # type: ignore[reportArgumentType]
+
+            assert (
+                exp_info.value.args[0]
+                == "'epilogue' MUST be a callable object."
+            )
+
+    def test_mark_epilogue_return_value(self) -> None:
+        """:meth:`WorkflowBuilder.mark_epilogue` should return the callable
+        object passed to it.
+        """
+
+        def _remove_temp_directories() -> None:
+            shutil.rmtree(
+                path="/tmp/sghi-etl-workflow-tmp-dir",  # noqa: S108
+                ignore_errors=True,
+            )
+
+        assert self._instance1.mark_epilogue(_noop) is _noop
+        assert (
+            self._instance2.mark_epilogue(_remove_temp_directories)
+            is _remove_temp_directories
+        )
+
+    def test_mark_prologue_modification_with_an_invalid_value_fails(
+        self,
+    ) -> None:
+        """Passing a non-callable value to the
+        :meth:`WorkflowBuilder.mark_prologue` method should raise a
+        exc:`ValueError`.
+        """
+        for non_callable in (None, 1, 5.2, "not a callable"):
+            with pytest.raises(ValueError, match="be a callable") as exp_info:
+                self._instance1.mark_prologue(non_callable)  # type: ignore[reportArgumentType]
+
+            assert (
+                exp_info.value.args[0]
+                == "'prologue' MUST be a callable object."
+            )
+
+    def test_mark_prologue_modification_with_valid_value_succeeds(
+        self,
+    ) -> None:
+        """Invoking the :meth:`WorkflowBuilder.mark_prologue` method with a
+        valid callable should succeed.
+        """
+        try:
+            self._instance1.mark_prologue(_noop)
+        except Exception as exp:  # noqa: BLE001
+            _fail_reason: str = (
+                "Invoking the 'WorkflowBuilder.prologue' method with a "
+                "callable object SHOULD succeed. However, the following "
+                f"exception was raised: '{exp!r}'."
+            )
+            pytest.fail(reason=_fail_reason)
+
+        @self._instance2.mark_prologue
+        def _check_properly_configured() -> None:
+            if not os.environ.get("DB_PASSWORD", None):
+                _err_msg: str = "'DB_PASSWORD' not specified."
+                raise RuntimeError(_err_msg)
+
+        assert self._instance1.prologue is _noop
+        assert self._instance2.prologue is _check_properly_configured
+
+    def test_mark_prologue_return_value(self) -> None:
+        """:meth:`WorkflowBuilder.mark_prologue` should return the callable
+        object passed to it.
+        """
+
+        def _check_properly_configured() -> None:
+            if not os.environ.get("DB_PASSWORD", None):
+                _err_msg: str = "'DB_PASSWORD' not specified."
+                raise RuntimeError(_err_msg)
+
+        assert self._instance1.mark_prologue(_noop) is _noop
+        assert (
+            self._instance2.mark_epilogue(_check_properly_configured)
+            is _check_properly_configured
+        )
+
     def test_name_modification_with_valid_value_succeeds(self) -> None:
         """Setting a non-empty string to the :attr:`WorkflowBuilder.name`
         attribute should succeed.
@@ -999,7 +1168,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2):
             with pytest.raises(TypeError, match="be a string") as exp_info:
-                self._instance1.name = non_str  # type: ignore
+                self._instance1.name = non_str  # type: ignore[reportArgumentType]
 
             assert exp_info.value.args[0] == "'name' MUST be a string."
 
@@ -1047,7 +1216,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.processor_factories = non_str  # type: ignore
+                self._instance1.processor_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -1062,6 +1231,50 @@ class TestWorkflowBuilder(TestCase):
         assert len(self._instance1.processor_factories) == 0
         assert len(self._instance2.processor_factories) == 1
         assert self._instance2.processor_factories[0] == NOOPProcessor
+
+    def test_prologue_modification_with_an_invalid_value_fails(self) -> None:
+        """Setting a non-callable value to the :attr:`WorkflowBuilder.prologue`
+        attribute should raise a :exc:`ValueError`.
+        """
+        for non_callable in (None, 1, 5.2, "not a callable"):
+            with pytest.raises(ValueError, match="be a callable") as exp_info:
+                self._instance1.prologue = non_callable  # type: ignore[reportArgumentType]
+
+            assert (
+                exp_info.value.args[0]
+                == "'prologue' MUST be a callable object."
+            )
+
+    def test_prologue_modification_with_valid_value_succeeds(self) -> None:
+        """Setting a callable object to the :attr:`WorkflowBuilder.prologue`
+        attribute should succeed.
+        """
+
+        def _check_properly_configured() -> None:
+            if not os.environ.get("DB_PASSWORD", None):
+                _err_msg: str = "'DB_PASSWORD' not specified."
+                raise RuntimeError(_err_msg)
+
+        try:
+            self._instance1.prologue = _noop
+            self._instance2.prologue = _check_properly_configured
+        except Exception as exp:  # noqa: BLE001
+            _fail_reason: str = (
+                "Setting the 'WorkflowBuilder.prologue' attribute with a "
+                "callable object SHOULD succeed. However, the following "
+                f"exception was raised: '{exp!r}'."
+            )
+            pytest.fail(reason=_fail_reason)
+
+        assert self._instance1.prologue is _noop
+        assert self._instance2.prologue is _check_properly_configured
+
+    def test_prologue_return_value(self) -> None:
+        r""":attr:`WorkflowBuilder.prologue` should return the callable object
+        to execute at the end of the assembled ``WorkflowDefinition``\ (s).
+        """
+        assert callable(self._instance1.prologue)
+        assert self._instance2.prologue is _noop
 
     def test_sink_factories_modification_with_valid_value_succeeds(
         self,
@@ -1092,7 +1305,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.sink_factories = non_str  # type: ignore
+                self._instance1.sink_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
@@ -1138,7 +1351,7 @@ class TestWorkflowBuilder(TestCase):
         """
         for non_str in (None, 1, 5.2, self._instance2, {}):
             with pytest.raises(TypeError, match="Sequence") as exp_info:
-                self._instance1.source_factories = non_str  # type: ignore
+                self._instance1.source_factories = non_str  # type: ignore[reportArgumentType]
 
             assert (
                 exp_info.value.args[0]
