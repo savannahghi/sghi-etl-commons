@@ -6,12 +6,12 @@ import logging
 from logging import Logger
 from typing import TYPE_CHECKING, Final, TypeVar
 
-from sghi.utils import ensure_callable
+from sghi.etl.core import WorkflowDefinition
+from sghi.utils import ensure_predicate, type_fqn
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from sghi.etl.core import WorkflowDefinition
 
 # =============================================================================
 # TYPES
@@ -38,7 +38,10 @@ _LOGGER: Final[Logger] = logging.getLogger(name=__name__)
 # =============================================================================
 
 
-def run_workflow(wf: Callable[[], WorkflowDefinition[_RDT, _PDT]]) -> None:
+def run_workflow(
+    wf: Callable[[], WorkflowDefinition[_RDT, _PDT]]
+    | WorkflowDefinition[_RDT, _PDT],
+) -> None:
     """Execute an ETL :class:`Workflow<WorkflowDefinition>`.
 
     .. tip::
@@ -48,10 +51,11 @@ def run_workflow(wf: Callable[[], WorkflowDefinition[_RDT, _PDT]]) -> None:
         :class:`WorkflowDefinition` class that is being executed or about to
         be executed.
 
-    This function accepts a factory function that supplies an ETL
-    ``WorkflowDefinition`` instance, it then invokes the function to get the
-    ``WorkflowDefinition``/workflow and then executes it. The execution of the
-    workflow proceeds as follows:
+    This function accepts an ETL ``WorkflowDefinition`` instance or factory
+    function that supplies a ``WorkflowDefinition`` instance. If a factory
+    function is provided, it is first invoked to get the
+    ``WorkflowDefinition``/workflow before execution of the workflow starts.
+    The execution of the workflow proceeds as follows:
 
         1. The callable returned by the
            :attr:`~sghi.etl.core.WorkflowDefinition.prologue` property is
@@ -92,22 +96,30 @@ def run_workflow(wf: Callable[[], WorkflowDefinition[_RDT, _PDT]]) -> None:
         description.
 
     If an exception is raised during the workflow execution, all the workflow's
-    components (source, processor, sink) are disposed of followed by the
-    propagation of the error to the caller. If the supplied value **IS NOT** a
-    valid callable object, a :exc:`ValueError` is raised.
+    components (source, processor, sink) are disposed of, the epilogue callable
+    is invoked, and the error is propagated to the caller.
 
-    :param wf: A factory function that supplies the ``WorkflowDefinition``
-        instance to be executed. This function is only invoked once. The given
-        value *MUST* be a valid callable object, and it *MUST NOT* have any
-        required arguments.
+    :param wf: A ``WorkflowDefinition`` instance or a factory function that
+        supplies the ``WorkflowDefinition`` instance to be executed. If a
+        factory function is given, it is only invoked once. The given
+        value *MUST EITHER* be a ``WorkflowDefinition`` instance or valid
+        callable object.
 
     :return: None.
 
-    :raise ValueError: If ``wf`` is NOT a callable object.
+    :raise ValueError: If ``wf`` is NEITHER a ``WorkflowDefinition`` instance
+        NOR a callable object.
     """
-    ensure_callable(wf, message="'wf' MUST be a valid callable object.")
+    ensure_predicate(
+        test=callable(wf) or isinstance(wf, WorkflowDefinition),
+        exc_factory=ValueError,
+        message=(
+            "'wf' MUST be a valid callable object or an "
+            f"'{type_fqn(WorkflowDefinition)}' instance."
+        ),
+    )
 
-    wd: WorkflowDefinition = wf()
+    wd: WorkflowDefinition = wf() if callable(wf) else wf
     try:
         _LOGGER.info("[%s:%s] Setting up workflow ...", wd.id, wd.name)
         wd.prologue()
