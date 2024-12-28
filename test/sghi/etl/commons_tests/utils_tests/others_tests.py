@@ -79,17 +79,19 @@ def _create_workflow_factory(  # noqa: PLR0913
 # =============================================================================
 
 
-def test_run_workflow_fails_on_non_callable_input() -> None:
+def test_run_workflow_fails_on_invalid_input_wf_value() -> None:
     """:func:`sghi.etl.commons.utils.run_workflow` should raise a
-    :exc:`ValueError` when given a non-callable input value.
+    :exc:`ValueError` when given a non-callable input value or a
+    value that is not :class:`WorkflowDefinition` instance.
     """
-    wf = _create_workflow_factory([])
-    for non_callable in (None, wf()):
+    for invalid_val in (None, "", 1, 5.3):
         with pytest.raises(ValueError, match="callable object.") as exp_info:
-            run_workflow(wf=non_callable)  # type: ignore[reportArgumentType]
+            run_workflow(wf=invalid_val)  # type: ignore[reportArgumentType]
 
         assert (
-            exp_info.value.args[0] == "'wf' MUST be a valid callable object."
+            exp_info.value.args[0]
+            == "'wf' MUST be a valid callable object or an "
+            "'sghi.etl.core.WorkflowDefinition' instance."
         )
 
 
@@ -268,7 +270,8 @@ def test_run_workflow_side_effects_on_successful_execution() -> None:
     wf2 = _create_workflow_factory(repository2, 10, 60, 10, set_up, clean_up)
 
     run_workflow(wf1)
-    run_workflow(wf2)
+    # noinspection PyTypeChecker
+    run_workflow(wf2())
 
     assert repository1 == ["100", "101", "102", "103", "104"]
     assert repository2 == ["110", "120", "130", "140", "150"]
