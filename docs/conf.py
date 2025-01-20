@@ -56,11 +56,26 @@ exclude_patterns = []
 nitpicky = True
 
 nitpick_ignore = [
-    ("py:attr", "sghi.etl.core.WorkflowDefinition.epilogue"),  # docs aren't published yet
-    ("py:attr", "sghi.etl.core.WorkflowDefinition.prologue"),  # docs aren't published yet
-    ("py:attr", "sghi.etl.core.WorkflowDefinition.processor_factory"),  # docs aren't published yet
-    ("py:attr", "sghi.etl.core.WorkflowDefinition.sink_factory"),  # docs aren't published yet
-    ("py:attr", "sghi.etl.core.WorkflowDefinition.source_factory"),  # docs aren't published yet
+    (
+        "py:attr",
+        "sghi.etl.core.WorkflowDefinition.epilogue",
+    ),  # docs aren't published yet
+    (
+        "py:attr",
+        "sghi.etl.core.WorkflowDefinition.prologue",
+    ),  # docs aren't published yet
+    (
+        "py:attr",
+        "sghi.etl.core.WorkflowDefinition.processor_factory",
+    ),  # docs aren't published yet
+    (
+        "py:attr",
+        "sghi.etl.core.WorkflowDefinition.sink_factory",
+    ),  # docs aren't published yet
+    (
+        "py:attr",
+        "sghi.etl.core.WorkflowDefinition.source_factory",
+    ),  # docs aren't published yet
     ("py:class", "_RDT"),  # private type annotations
     ("py:class", "_PDT"),  # private type annotations
     ("py:class", "Executor"),  # sphinx can't find it
@@ -70,29 +85,62 @@ nitpick_ignore = [
     ("py:class", "Sink"),  # docs aren't published yet
     ("py:class", "Source"),  # docs aren't published yet
     ("py:class", "WorkflowDefinition"),  # docs aren't published yet
-    ("py:class", "TracebackType"),  # Used as type annotation. Only available when type checking
+    (
+        "py:class",
+        "TracebackType",
+    ),  # Used as type annotation. Only available when type checking
     ("py:class", "concurrent.futures._base.Executor"),  # sphinx can't find it
     ("py:class", "concurrent.futures._base.Future"),  # sphinx can't find it
     ("py:class", "sghi.exceptions.SGHIError"),  # sphinx can't find it
-    ("py:class", "sghi.etl.commons.processors._RDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.processors._PDT"),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.processors._RDT",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.processors._PDT",
+    ),  # private type annotations
     ("py:class", "sghi.etl.commons.sinks._PDT"),  # private type annotations
     ("py:class", "sghi.etl.commons.sources._RDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.utils.result_gatherers._T"),  # private type annotations
-    ("py:class", "sghi.etl.commons.utils.result_gatherers._T1"),  # private type annotations
-    ("py:class", "sghi.etl.commons.workflow_builder._RDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.workflow_builder._PDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.workflow_definitions._RDT"),  # private type annotations
-    ("py:class", "sghi.etl.commons.workflow_definitions._PDT"),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.utils.result_gatherers._T",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.utils.result_gatherers._T1",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.workflow_builder._RDT",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.workflow_builder._PDT",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.workflow_definitions._RDT",
+    ),  # private type annotations
+    (
+        "py:class",
+        "sghi.etl.commons.workflow_definitions._PDT",
+    ),  # private type annotations
     ("py:class", "sghi.etl.core._RDT"),  # private type annotations
     ("py:class", "sghi.etl.core._PDT"),  # private type annotations
     ("py:class", "sghi.etl.core.Processor"),  # docs aren't published yet
     ("py:class", "sghi.etl.core.Sink"),  # docs aren't published yet
     ("py:class", "sghi.etl.core.Source"),  # docs aren't published yet
-    ("py:class", "sghi.etl.core.WorkflowDefinition"),  # docs aren't published yet
+    (
+        "py:class",
+        "sghi.etl.core.WorkflowDefinition",
+    ),  # docs aren't published yet
     ("py:class", "sghi.retry.Retry"),  # docs aren't published yet
     ("py:exc", "ResourceDisposedError"),  # docs aren't published yet
-    ("py:exc", "sghi.disposable.ResourceDisposedError"),  # docs aren't published yet
+    (
+        "py:exc",
+        "sghi.disposable.ResourceDisposedError",
+    ),  # docs aren't published yet
     ("py:func", "sghi.disposable.not_disposed"),  # docs aren't published yet
     ("py:meth", "sghi.etl.core.Processor.apply"),  # docs aren't published yet
     ("py:meth", "sghi.etl.core.Source.draw"),  # docs aren't published yet
@@ -100,10 +148,22 @@ nitpick_ignore = [
     ("py:obj", "sghi.etl.commons.processors._RDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.sinks._PDT"),  # private type annotations
     ("py:obj", "sghi.etl.commons.sources._RDT"),  # private type annotations
-    ("py:obj", "sghi.etl.commons.workflow_builder._RDT"),  # private type annotations
-    ("py:obj", "sghi.etl.commons.workflow_builder._PDT"),  # private type annotations
-    ("py:obj", "sghi.etl.commons.workflow_definitions._RDT"),  # private type annotations
-    ("py:obj", "sghi.etl.commons.workflow_definitions._PDT"),  # private type annotations
+    (
+        "py:obj",
+        "sghi.etl.commons.workflow_builder._RDT",
+    ),  # private type annotations
+    (
+        "py:obj",
+        "sghi.etl.commons.workflow_builder._PDT",
+    ),  # private type annotations
+    (
+        "py:obj",
+        "sghi.etl.commons.workflow_definitions._RDT",
+    ),  # private type annotations
+    (
+        "py:obj",
+        "sghi.etl.commons.workflow_definitions._PDT",
+    ),  # private type annotations
 ]
 
 templates_path = ["templates"]

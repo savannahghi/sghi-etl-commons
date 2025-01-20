@@ -7,6 +7,7 @@ from logging import Logger
 from typing import TYPE_CHECKING, Final, TypeVar
 
 from sghi.etl.core import WorkflowDefinition
+from sghi.retry import Retry, noop_retry
 from sghi.utils import ensure_predicate, type_fqn
 
 if TYPE_CHECKING:
@@ -41,6 +42,7 @@ _LOGGER: Final[Logger] = logging.getLogger(name=__name__)
 def run_workflow(
     wf: Callable[[], WorkflowDefinition[_RDT, _PDT]]
     | WorkflowDefinition[_RDT, _PDT],
+    retry_policy_factory: Callable[[], Retry] | None = None,
 ) -> None:
     """Execute an ETL :class:`Workflow<WorkflowDefinition>`.
 
@@ -99,16 +101,39 @@ def run_workflow(
     components (source, processor, sink) are disposed of, the epilogue callable
     is invoked, and the error is propagated to the caller.
 
+    Optionally, a factory function that suppliers retry policy instances to
+    apply to each of the following operations can be provided:
+
+        - ``prologue``
+        - ``epilogue``
+        - ``Source.draw``
+        - ``Processor.apply``
+        - ``Sink.drain``
+
+    The factory function(when provided) is invoked at *MOST ONCE* for each of
+    the above operations (and in the same order) to supply a :class:`Retry`
+    instance that wraps the operation.
+
     :param wf: A ``WorkflowDefinition`` instance or a factory function that
         supplies the ``WorkflowDefinition`` instance to be executed. If a
         factory function is given, it is only invoked once. The given
         value *MUST EITHER* be a ``WorkflowDefinition`` instance or valid
         callable object.
+    :param retry_policy_factory: An optional function that supplies retry
+        policy instances to apply to each of the following operations:
+        ``prologue``, ``epilogue``, ``Source.draw``, ``Processor.apply`` and
+        ``Sink.drain``. For each of these operations, the given factory
+        function is invoked at MOST once(and in the same order), to supply a
+        ``Retry`` instance to wrap the operation. This *MUST* be a valid
+        callable object when *NOT* ``None``.
 
     :return: None.
 
     :raise ValueError: If ``wf`` is NEITHER a ``WorkflowDefinition`` instance
-        NOR a callable object.
+        NOR a callable object or if ``retry_policy_factory`` is NEITHER
+        ``None`` NOR a callable object.
+
+    .. versionadded:: 1.2.0 The ``retry_policy_factory`` parameter.
     """
     ensure_predicate(
         test=callable(wf) or isinstance(wf, WorkflowDefinition),
@@ -118,23 +143,46 @@ def run_workflow(
             f"'{type_fqn(WorkflowDefinition)}' instance."
         ),
     )
+    ensure_predicate(
+        test=retry_policy_factory is None or callable(retry_policy_factory),
+        exc_factory=ValueError,
+        message=(
+            "'retry_policy_factory' MUST be a valid callable object when NOT "
+            "None."
+        ),
+    )
 
+    _retry_policy_factory: Callable[[], Retry]
+    _retry_policy_factory = retry_policy_factory or noop_retry
     wd: WorkflowDefinition = wf() if callable(wf) else wf
+    prologue: Callable[[], None] = _retry_policy_factory().retry(wd.prologue)
+    epilogue: Callable[[], None] = _retry_policy_factory().retry(wd.epilogue)
     try:
         _LOGGER.info("[%s:%s] Setting up workflow ...", wd.id, wd.name)
-        wd.prologue()
+        prologue()
         _LOGGER.info("[%s:%s] Starting workflow execution ...", wd.id, wd.name)
         with (
             wd.source_factory() as source,
             wd.processor_factory() as processor,
             wd.sink_factory() as sink,
         ):
-            sink.drain(processor.apply(source.draw()))
+            draw = _retry_policy_factory().retry(source.draw)
+            process = _retry_policy_factory().retry(processor.apply)
+            drain = _retry_policy_factory().retry(sink.drain)
+
+            drain(process(draw()))
         _LOGGER.info(
             "[%s:%s] Workflow execution complete. Cleaning up ...",
             wd.id,
             wd.name,
         )
+    except Exception:
+        _LOGGER.exception(
+            "[%s:%s] Error executing workflow :(",
+            wd.id,
+            wd.name,
+        )
+        raise
     finally:
-        wd.epilogue()
+        epilogue()
         _LOGGER.info("[%s:%s] Done :)", wd.id, wd.name)
