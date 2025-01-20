@@ -1,3 +1,10 @@
+## [1.2.0-rc.2](https://github.com/savannahghi/sghi-etl-commons/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2025-01-20)
+
+
+### Features
+
+* **utils:** add retrying support when running workflows ([#37](https://github.com/savannahghi/sghi-etl-commons/issues/37)) ([7912aac](https://github.com/savannahghi/sghi-etl-commons/commit/7912aac35b30c25c44b2ede8e7fbeb35e59bb1a4))
+
 ## [1.2.0-rc.1](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0...v1.2.0-rc.1) (2024-12-28)
 
 
