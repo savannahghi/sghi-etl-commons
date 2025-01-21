@@ -1,6 +1,6 @@
 {
   "name": "sghi-etl-commons",
-  "version": "1.2.0-rc.2",
+  "version": "1.2.0",
   "description": "Collection of utilities for working with SGHI ETL Workflows.",
   "directories": {
     "doc": "docs"

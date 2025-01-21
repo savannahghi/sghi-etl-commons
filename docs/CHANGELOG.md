@@ -1,3 +1,17 @@
+## [1.2.0](https://github.com/savannahghi/sghi-etl-commons/compare/v1.1.0...v1.2.0) (2025-01-21)
+
+
+### Dependency Updates
+
+* **deps:** upgrade project dependencies ([#31](https://github.com/savannahghi/sghi-etl-commons/issues/31)) ([3279164](https://github.com/savannahghi/sghi-etl-commons/commit/3279164ee701f33228d22e033a985c1a8ccd9cda))
+
+
+### Features
+
+* **core:** add support for `prologue` and `epilogue` workflow properties ([#34](https://github.com/savannahghi/sghi-etl-commons/issues/34)) ([b8fa894](https://github.com/savannahghi/sghi-etl-commons/commit/b8fa89428c6218119e1e1b6fe051e984db265aaf))
+* support running workflow instances directly ([#35](https://github.com/savannahghi/sghi-etl-commons/issues/35)) ([8363850](https://github.com/savannahghi/sghi-etl-commons/commit/8363850b3e1d115b7522926bf3a55c6e9bc4a3df))
+* **utils:** add retrying support when running workflows ([#37](https://github.com/savannahghi/sghi-etl-commons/issues/37)) ([7912aac](https://github.com/savannahghi/sghi-etl-commons/commit/7912aac35b30c25c44b2ede8e7fbeb35e59bb1a4))
+
 ## [1.2.0-rc.2](https://github.com/savannahghi/sghi-etl-commons/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2025-01-20)
 
 
