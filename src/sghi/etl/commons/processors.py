@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from contextlib import ExitStack
@@ -204,12 +205,12 @@ class ProcessorPipe(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
     """
 
     __slots__ = (
-        "_processors",
-        "_retry_policy_factory",
+        "_exit_stack",
         "_is_disposed",
         "_logger",
-        "_exit_stack",
         "_prepped_processors",
+        "_processors",
+        "_retry_policy_factory",
     )
 
     def __init__(
@@ -374,15 +375,15 @@ class ScatterGatherProcessor(
     """
 
     __slots__ = (
-        "_processors",
-        "_retry_policy_factory",
+        "_executor",
         "_executor_factory",
-        "_result_gatherer",
+        "_exit_stack",
         "_is_disposed",
         "_logger",
-        "_exit_stack",
         "_prepped_processors",
-        "_executor",
+        "_processors",
+        "_result_gatherer",
+        "_retry_policy_factory",
     )
 
     def __init__(
@@ -594,15 +595,15 @@ class SplitGatherProcessor(
     """  # noqa: D205
 
     __slots__ = (
-        "_processors",
-        "_retry_policy_factory",
+        "_executor",
         "_executor_factory",
-        "_result_gatherer",
+        "_exit_stack",
         "_is_disposed",
         "_logger",
-        "_exit_stack",
         "_prepped_processors",
-        "_executor",
+        "_processors",
+        "_result_gatherer",
+        "_retry_policy_factory",
     )
 
     def __init__(
@@ -803,7 +804,11 @@ class SplitGatherProcessor(
 
 @final
 class _ProcessorOfCallable(Processor[_RDT, _PDT], Generic[_RDT, _PDT]):
-    __slots__ = ("_delegate_to", "_is_disposed", "_logger")
+    # See: https://github.com/python/cpython/pull/106771
+    if sys.version_info[:3] >= (3, 13, 0):  # pragma: no cover
+        __slots__ = ("__dict__", "_delegate_to", "_is_disposed", "_logger")
+    else:  # pragma: no cover
+        __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
     def __init__(self, delegate_to: _ProcessorCallable[_RDT, _PDT]) -> None:
         super().__init__()

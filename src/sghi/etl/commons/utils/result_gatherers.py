@@ -90,7 +90,7 @@ def fail_fast(
         for future in futures:
             try:
                 yield future.result()
-            except BaseException as exp:  # noqa: BLE001
+            except BaseException as exp:
                 if exc_wrapper_factory:
                     raise exc_wrapper_factory(exc_wrapper_message) from exp
                 else:

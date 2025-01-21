@@ -34,6 +34,15 @@ _RDT = TypeVar("_RDT")
 
 
 # =============================================================================
+# HELPERS
+# =============================================================================
+
+
+def _noop() -> None:
+    """Do nothing."""
+
+
+# =============================================================================
 # SPEC IMPLEMENTATIONS
 # =============================================================================
 
@@ -45,7 +54,18 @@ class SimpleWorkflowDefinition(
 ):
     """A simple :class:`WorkflowDefinition` implementation."""
 
-    def __init__(
+    __slots__ = (
+        "_description",
+        "_epilogue",
+        "_id",
+        "_name",
+        "_processor_factory",
+        "_prologue",
+        "_sink_factory",
+        "_source_factory",
+    )
+
+    def __init__(  # noqa: PLR0913
         self,
         id: str,  # noqa: A002
         name: str,
@@ -53,6 +73,8 @@ class SimpleWorkflowDefinition(
         description: str | None = None,
         processor_factory: Callable[[], Processor[_RDT, _PDT]] = NOOPProcessor,
         sink_factory: Callable[[], Sink[_PDT]] = NullSink,
+        prologue: Callable[[], None] = _noop,
+        epilogue: Callable[[], None] = _noop,
     ) -> None:
         """Create a new ``WorkflowDefinition`` with the provided properties.
 
@@ -77,13 +99,20 @@ class SimpleWorkflowDefinition(
         :param sink_factory: A function that suppliers the ``Sink`` associated
             with the created workflow. This MUST be a valid callable. Defaults
             to ``NullSink`` when not provided.
+        :param prologue: An optional function to be invoked at the beginning of
+            the created workflow. This MUST be a valid callable. Defaults to
+            a callable that does nothing when invoked.
+        :param epilogue: An optional function to be invoked at the end of the
+            created workflow. This MUST be a valid callable. Defaults to
+            a callable that does nothing when invoked.
 
         :raise TypeError: If ``id`` or ``name`` are NOT strings, or if
             ``description`` is provided but is NOT a string.
         :raise ValueError: If one of the following is ``True``; ``id`` is an
             empty string, ``name`` is an empty string, ``source_factory`` is
             NOT a valid callable, ``processor_factory`` is NOT a valid callable
-            or ``sink_factory`` is NOT a valid callable.
+            , ``sink_factory`` is NOT a valid callable, ``prologue`` is NOT a
+            valid callable or ``epilogue`` is NOT a valid callable.
         """
         super().__init__()
         self._id: str = ensure_not_none_nor_empty(
@@ -120,6 +149,14 @@ class SimpleWorkflowDefinition(
             value=sink_factory,
             message="'sink_factory' MUST be a callable object.",
         )
+        self._prologue: Callable[[], None] = ensure_callable(
+            value=prologue,
+            message="'prologue' MUST be a callable object.",
+        )
+        self._epilogue: Callable[[], None] = ensure_callable(
+            value=epilogue,
+            message="'epilogue' MUST be a callable object.",
+        )
 
     @property
     @override
@@ -150,6 +187,33 @@ class SimpleWorkflowDefinition(
     @override
     def sink_factory(self) -> Callable[[], Sink[_PDT]]:
         return self._sink_factory
+
+    @property
+    @override
+    def prologue(self) -> Callable[[], None]:
+        """A callable to be executed at the beginning of the workflow.
+
+        If the execution of this callable fails, i.e. raises an exception, then
+        the main workflow is never executed, only the callable returned by the
+        :attr:`epilogue` property is.
+        This can be used to validate the loaded configuration, setting up
+        certain resources before the workflow execution starts, etc.
+
+        .. versionadded:: 1.2.0
+        """
+        return self._prologue
+
+    @property
+    @override
+    def epilogue(self) -> Callable[[], None]:
+        """A callable to be executed at the end of the workflow.
+
+        This is always executed regardless of whether the resulting workflow
+        or its :attr:`prologue` callable completed successfully.
+
+        .. versionadded:: 1.2.0
+        """
+        return self._epilogue
 
 
 # =============================================================================

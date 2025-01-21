@@ -36,6 +36,10 @@ def _ints_to_str_mapper_factory() -> Processor[Iterable[int], Iterable[str]]:
     return ints_to_str
 
 
+def _noop() -> None:
+    """Do nothing."""
+
+
 def _printer_factory() -> Sink[Iterable[Any]]:
     return sink(print)
 
@@ -60,6 +64,8 @@ class TestSimpleWorkflowDefinitions(TestCase):
             description="A test workflow that takes ints and prints all them.",
             processor_factory=_ints_to_str_mapper_factory,
             sink_factory=_printer_factory,
+            epilogue=_noop,
+            prologue=_noop,
         )
 
         assert wf_def.id == "test_workflow"
@@ -68,9 +74,11 @@ class TestSimpleWorkflowDefinitions(TestCase):
             wf_def.description
             == "A test workflow that takes ints and prints all them."
         )
+        assert wf_def.prologue is _noop
         assert wf_def.source_factory is _ints_supplier_factory
         assert wf_def.processor_factory is _ints_to_str_mapper_factory
         assert wf_def.sink_factory is _printer_factory
+        assert wf_def.epilogue is _noop
 
     def test_instantiation_fails_on_none_str_id_argument(self) -> None:
         """Instantiating a :class:`SimpleWorkflowDefinition` with a non-string
@@ -81,7 +89,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
         for invalid_id in invalid_ids:
             with pytest.raises(TypeError, match="be a string") as exp_info:
                 SimpleWorkflowDefinition(
-                    id=invalid_id,  # type: ignore
+                    id=invalid_id,  # type: ignore[reportArgumentType]
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
                 )
@@ -111,7 +119,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
             with pytest.raises(TypeError, match="be a string") as exp_info:
                 SimpleWorkflowDefinition(
                     id="test_workflow",
-                    name=invalid_name,  # type: ignore
+                    name=invalid_name,  # type: ignore[reportArgumentType]
                     source_factory=_ints_supplier_factory,
                 )
 
@@ -142,7 +150,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                 SimpleWorkflowDefinition(
                     id="test_workflow",
                     name="Test Workflow",
-                    source_factory=invalid_src_factory,  # type: ignore
+                    source_factory=invalid_src_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -162,7 +170,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    description=invalid_description,  # type: ignore
+                    description=invalid_description,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -183,7 +191,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    processor_factory=invalid_prc_factory,  # type: ignore
+                    processor_factory=invalid_prc_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (
@@ -204,7 +212,7 @@ class TestSimpleWorkflowDefinitions(TestCase):
                     id="test_workflow",
                     name="Test Workflow",
                     source_factory=_ints_supplier_factory,
-                    sink_factory=invalid_sink_factory,  # type: ignore
+                    sink_factory=invalid_sink_factory,  # type: ignore[reportArgumentType]
                 )
 
             assert (

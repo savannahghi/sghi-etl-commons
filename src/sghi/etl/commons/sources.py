@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from contextlib import ExitStack
@@ -124,15 +125,15 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
     """
 
     __slots__ = (
-        "_sources",
-        "_retry_policy_factory",
+        "_executor",
         "_executor_factory",
-        "_result_gatherer",
+        "_exit_stack",
         "_is_disposed",
         "_logger",
-        "_exit_stack",
         "_prepped_sources",
-        "_executor",
+        "_result_gatherer",
+        "_retry_policy_factory",
+        "_sources",
     )
 
     def __init__(
@@ -299,7 +300,11 @@ class GatherSource(Source[Sequence[_RDT]], Generic[_RDT]):
 
 @final
 class _SourceOfCallable(Source[_RDT], Generic[_RDT]):
-    __slots__ = ("_delegate_to", "_is_disposed", "_logger")
+    # See: https://github.com/python/cpython/pull/106771
+    if sys.version_info[:3] >= (3, 13, 0):  # pragma: no cover
+        __slots__ = ("__dict__", "_delegate_to", "_is_disposed", "_logger")
+    else:  # pragma: no cover
+        __slots__ = ("_delegate_to", "_is_disposed", "_logger")
 
     def __init__(self, delegate_to: _SourceCallable[_RDT]) -> None:
         super().__init__()
