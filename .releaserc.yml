@@ -27,6 +27,16 @@ plugins:
               hasChanged: true
               numMatches: 1
               numReplacements: 1
+        - countMatches: true
+          files:
+            - README.md
+          from: 'sghi-etl-commons.git@v.*'
+          to: 'sghi-etl-commons.git@v${nextRelease.version}'
+          results:
+            - file: README.md
+              hasChanged: true
+              numMatches: 1
+              numReplacements: 1
   - - '@semantic-release/changelog'
     - changelogFile: docs/CHANGELOG.md
   - - '@semantic-release/git'
