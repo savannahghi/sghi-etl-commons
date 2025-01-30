@@ -110,7 +110,9 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
 
     Here are a couple of usage examples:
 
-    Example 1
+    **Example 1**
+
+    Here is the famous hello-world version of SGHI ETL.
 
     .. code-block:: python
        :linenos:
@@ -128,7 +130,31 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
        wb.draw_from(hello_world).drain_to(sink(print))
        run_workflow(wb)
 
-    Example 2
+    All SGHI ETL Workflows are required to have a unique identifier and a
+    name(preferably human-readable). In the example above, we create a
+    ``WorkflowBuilder`` instance whose ``id`` is `say_hello` and whose name is
+    `Hello World`. The generic type hints indicate that the created
+    ``WorkflowBuilder`` instance accepts a source that produces a string and
+    accepts a sink that consumes a string. There are cases where you might have
+    a sink that produces one type and a sink that consumes a different type,
+    but let us not get ahead of ourselves.
+
+    In our example, we define a simple source that returns the string "Hello,
+    World!". We then add it to the ``WorkflowBuilder`` instance using the
+    :meth:`~WorkflowBuilder.draw_from` method. Next, we wrap the Python
+    built-in ``print`` function with the sink decorator thereby creating a
+    suitable sink for our workflow. This is then connected to the
+    ``WorkflowBuilder`` using the :meth:`~WorkflowBuilder.drain_to` method.
+
+    Finally, we execute the workflow using the
+    :func:`~sghi.etl.commons.utils.others.run_workflow` function. This causes
+    the text "Hello, World!" to be printed.
+
+    ----
+
+    **Example 2**
+
+    Working with large datasets.
 
     .. code-block:: python
        :linenos:
@@ -157,7 +183,16 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
        wb.draw_from(supply_ints).drain_to(print_each)
        run_workflow(wb)
 
-    Example 3
+    This example builds on the previous example but uses streams of data
+    instead of single/scalar values. The ``supply_ints`` source could
+    potentially produce millions of values, but the workflow would remain
+    memory efficient since it works with only one value at a time.
+
+    ----
+
+    **Example 3**
+
+    Complex workflows.
 
     .. code-block:: python
        :linenos:
@@ -225,6 +260,31 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
 
        run_workflow(wb)
 
+    This example demonstrates how complex workflows can be constructed by
+    combining multiple components, namely sources, sinks, and processors. It
+    also introduces a new SGHI ETL Workflow component, the ``processor``. A
+    ``processor`` is applied to data drawn from a source to transform it into
+    a more suitable form before the data is drained to a sink. Occasionally, a
+    processor can output data of a different type than it received, hence the
+    two generic type hints on the ``WorkflowBuilder`` class.
+
+    When multiple components of the same kind are added to the same workflow,
+    they form a composite component. In our example, the three processors are
+    combined to create a :class:`~sghi.etl.commons.processors.ProcessorPipe`,
+    as indicated by the ``composite_processor_factory`` constructor parameter
+    of the ``WorkflowBuilder`` class. A ``ProcessorPipe`` "pipes" data through
+    its child processors, similar to the UNIX pipe. That is, the output of one
+    child processor is passed as the input to the next one. The two sinks are
+    combined to form a :class:`~sghi.etl.commons.sinks.ScatterSink`, as
+    indicated by the ``composite_sink_factory`` constructor parameter of the
+    ``WorkflowBuilder`` class. A ``ScatterSink`` drains (the same) data to its
+    child sinks concurrently. There exist other composite processors, sinks,
+    and even sources. You can also build your own.
+
+    Finally, this example illustrates that we can define a workflow by
+    decorating workflow components using specific methods of a
+    ``WorkflowBuilder`` instance. Note that the names of these methods are in
+    the third-person singular form.
     """  # noqa: D205
 
     __slots__ = (
