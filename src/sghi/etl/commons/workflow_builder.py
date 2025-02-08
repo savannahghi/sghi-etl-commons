@@ -206,10 +206,8 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
        wb = WorkflowBuilder(
            id="test3",
            name="Test Workflow 3",
-           composite_processor_factory=ProcessorPipe[
-               Iterable[int], Sequence[str]
-           ],
-           composite_sink_factory=ScatterSink[Sequence[str]],
+           composite_processor_factory=ProcessorPipe,
+           composite_sink_factory=ScatterSink,
        )
 
 
@@ -219,7 +217,7 @@ class WorkflowBuilder(Generic[_RDT, _PDT]):
        @source
        def supply_ints() -> Iterable[int]:
            for _ in range(10):
-               yield random.randint(0, 9)  # noqa: S311
+               yield random.randint(0, 9)
 
 
        # PROCESSORS
