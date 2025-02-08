@@ -124,7 +124,7 @@ value at a time.
 
 ---
 
-Example 3
+**Example 3**
 
 Complex workflows.
 
@@ -138,10 +138,8 @@ wb: WorkflowBuilder[Iterable[int], Sequence[str]]
 wb = WorkflowBuilder(
     id="complex_workflow",
     name="Complex Workflow",
-    composite_processor_factory=ProcessorPipe[
-        Iterable[int], Sequence[str]
-    ],
-    composite_sink_factory=ScatterSink[Sequence[str]],
+    composite_processor_factory=ProcessorPipe,
+    composite_sink_factory=ScatterSink,
 )
 
 # SOURCES
@@ -150,7 +148,7 @@ wb = WorkflowBuilder(
 @source
 def supply_ints() -> Iterable[int]:
     for _ in range(10):
-        yield random.randint(0, 9)  # noqa: S311
+        yield random.randint(0, 9)
 
 # PROCESSORS
 # ----------------------------------------------------------------------
